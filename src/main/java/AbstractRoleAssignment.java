@@ -1,7 +1,7 @@
 import java.util.Objects;
 import java.util.UUID;
 
-abstract public class AbstractRoleAssignment {
+abstract public class AbstractRoleAssignment implements RoleAssignment {
     String assignmentId = UUID.randomUUID().toString();
     User user;
     Role role;
