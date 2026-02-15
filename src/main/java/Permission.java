@@ -8,6 +8,6 @@ public record Permission(String name, String resource, String description) {
         return String.format("%s on %s: %s",this.name,this.resource,this.description);
     }
     boolean matches(String namePattern, String resourcePattern) {
-        return name.matches(namePattern) && resource.matches(resourcePattern)
+        return name.matches(namePattern) && resource.matches(resourcePattern);
     }
 }
