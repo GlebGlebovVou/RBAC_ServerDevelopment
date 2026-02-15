@@ -6,19 +6,21 @@ abstract public class AbstractRoleAssignment implements RoleAssignment {
     User user;
     Role role;
     AssignmentMetadata metadata;
-    AbstractRoleAssignment(User user,Role role,AssignmentMetadata metadata) {
+    AbstractRoleAssignment(User user,Role role,AssignmentMetadata metadata){
         this.user = user;
         this.role = role;
-        this.metadata = metadata;
-    }
-    User user() {
+        this.metadata = metadata;}
+    public User user() {
         return this.user;
     }
-    Role role() {
+    public Role role() {
         return this.role;
     }
-    AssignmentMetadata metadata() {
+    public AssignmentMetadata metadata() {
         return this.metadata;
+    }
+    public String assignmentId() {
+        return assignmentId;
     }
     @Override
     public boolean equals(Object o) {
@@ -43,6 +45,6 @@ abstract public class AbstractRoleAssignment implements RoleAssignment {
         out += String.format("\nStatus: %s", isActive() ? "ACTIVE" : "NOT ACTIVE");
         return out;
     }
-    abstract boolean isActive();
-    abstract String assignmentType();
+    public abstract boolean isActive();
+    public abstract String assignmentType();
 }
