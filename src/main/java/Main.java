@@ -3,5 +3,6 @@
 
 public class Main {
     static void main() {
+        User u = User.validate("vou","v","nic@f.d");
     }
 }
