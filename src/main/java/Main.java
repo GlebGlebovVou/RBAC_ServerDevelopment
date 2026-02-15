@@ -14,20 +14,13 @@ public class Main {
                 );
         int ind = 1;
         for(List<String> curCheck : testsList) {
-            IO.println(String.format("%d. user: (usern: %s, full n: %s, em: %s)",ind,curCheck.get(0),curCheck.get(1),curCheck.get(2)));
-            try {
-                User u = User.validate(curCheck.get(0),curCheck.get(1),curCheck.get(2));
-                if(u.getClass().isRecord()) {
-                    IO.println("Correct validation");
-                }
+            IO.println(String.format("%d. user: (usern: %s, full n: %s, em: %s)", ind, curCheck.get(0), curCheck.get(1), curCheck.get(2)));
+            User u = User.validate(curCheck.get(0), curCheck.get(1), curCheck.get(2));
+            if (u != null) {
+                IO.println("Correct validation");
             }
-            catch(Exception e) {
-                IO.println(String.format("error happened: %s",e.getMessage()));
-            }
-            finally {
-                ind++;
-                IO.println();
-            }
+            ind++;
+            IO.println();
         }
     }
     static void main() {
