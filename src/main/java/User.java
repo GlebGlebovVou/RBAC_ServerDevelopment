@@ -21,5 +21,8 @@ public record User(String username, String fullName, String email) {
         }
         return new User(username, fullName, email);
     }
+    String format() {
+        return String.format("%s (%s) <%s>",this.username,this.fullName,this.email);
+    }
 
 }
