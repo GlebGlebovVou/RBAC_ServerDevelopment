@@ -55,12 +55,12 @@ public class Role {
     }
 
     String format() {
-        String out = String.format("Role: %s [ID: %s]\nDescription: %s",
-                name,id,description);
-        out += String.format("Permissions (%d):\n",permissions.size());
+        StringBuilder out = new StringBuilder(String.format("Role: %s [ID: %s]\nDescription: %s",
+                name, id, description));
+        out.append(String.format("Permissions (%d):\n", permissions.size()));
         for(Permission x : permissions) {
-            out += String.format("- %s on %s: %s",x.name(),x.resource(),x.description())
+            out.append(String.format("- %s on %s: %s", x.name(), x.resource(), x.description()));
         }
-        return out;
+        return out.toString();
     }
 }
