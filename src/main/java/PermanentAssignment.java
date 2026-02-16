@@ -12,7 +12,7 @@ PermanentAssignment(User user,Role role,AssignmentMetadata metadata) {
 
     @Override
     public boolean isActive() {
-        return revoked;
+        return !revoked;
     }
 
     @Override

@@ -1,3 +1,4 @@
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -11,6 +12,7 @@ public class Role {
         this.id = "role_" + UUID.randomUUID().toString();
         this.name = name;
         this.description = description;
+        this.permissions = new HashSet<Permission>();
     }
     void addPermission(Permission permission) {
         permissions.add(permission);
@@ -57,9 +59,14 @@ public class Role {
     String format() {
         StringBuilder out = new StringBuilder(String.format("Role: %s [ID: %s]\nDescription: %s",
                 name, id, description));
-        out.append(String.format("Permissions (%d):\n", permissions.size()));
-        for(Permission x : permissions) {
-            out.append(String.format("- %s on %s: %s", x.name(), x.resource(), x.description()));
+        try {
+            out.append(String.format("\nPermissions (%d):\n", permissions.size()));
+            for (Permission x : permissions) {
+                out.append(String.format("- %s\n", x.format()));
+            }
+        }
+        catch (Exception e) {
+            IO.println(e.getMessage());
         }
         return out.toString();
     }

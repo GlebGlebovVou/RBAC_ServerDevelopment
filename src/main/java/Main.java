@@ -25,5 +25,16 @@ public class Main {
     }
     static void main() {
         testValidation();
+        User us = User.validate("goal","cool","fdfd@gfg.");
+        Permission p = new Permission("ogo","users","klluta");
+        Permission vou = new Permission("nice","users","sdfjjksdfhk");
+        Role r = new Role("User","hihiha");
+        r.addPermission(p);
+        r.addPermission(vou);
+        PermanentAssignment a = new PermanentAssignment(us,r,AssignmentMetadata.now("user","fdfdf"));
+        a.revoke();
+        IO.println(a.summary());
+        TemporaryAssignment b = new TemporaryAssignment(us,r,AssignmentMetadata.now("user","sadasd"));
+        IO.println(b.summary());
     }
 }
