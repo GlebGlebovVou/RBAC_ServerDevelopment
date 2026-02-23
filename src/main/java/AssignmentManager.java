@@ -3,7 +3,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class AssignmentManager implements Repository<RoleAssignment>{
-    public Map<String, RoleAssignment> data;
+    public Map<String, RoleAssignment> data = new HashMap<String, RoleAssignment>();
 
     @Override
     public void add(RoleAssignment item) {
@@ -25,7 +25,7 @@ public class AssignmentManager implements Repository<RoleAssignment>{
 
     @Override
     public List<RoleAssignment> findAll() {
-        return (List<RoleAssignment>)data.values();
+        return data.values().stream().toList();
     }
 
     public List<RoleAssignment> findAll(AssignmentFilter filter, Comparator<RoleAssignment> sorter) {

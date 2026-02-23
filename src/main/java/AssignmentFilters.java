@@ -27,6 +27,6 @@ public class AssignmentFilters {
         return (RoleAssignment assignment) -> assignment.metadata().assignedAt().compareTo(date) > 0;
     }
     static AssignmentFilter expiringBefore(String date) {
-        return (RoleAssignment assignment) -> assignment.assignmentType().equals("TEMPORARY") && ((TemporaryAssignment)assignment).expiresAt.compareTo(date) < 0;
+        return (RoleAssignment assignment) -> assignment.assignmentType().equals("TEMPORARY") && ((TemporaryAssignment)assignment).isExpired();
     }
 }

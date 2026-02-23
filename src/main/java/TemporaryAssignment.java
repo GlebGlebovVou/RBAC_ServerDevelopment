@@ -1,7 +1,7 @@
 import java.time.LocalDateTime;
 
 public class TemporaryAssignment extends AbstractRoleAssignment {
-    String expiresAt = LocalDateTime.now().plusDays(20).toString();
+    String expiresAt = LocalDateTime.now().toString();
     boolean autoRenew;
     TemporaryAssignment(User user, Role role, AssignmentMetadata metadata) {
         super(user, role, metadata);
@@ -14,7 +14,7 @@ public class TemporaryAssignment extends AbstractRoleAssignment {
         expiresAt = newExpirationDate;
     }
     boolean isExpired() {
-        return LocalDateTime.now().toString().compareTo(expiresAt) > 0;
+        return LocalDateTime.now().toString().compareTo(expiresAt) <= 0;
     }
     @Override
     public String assignmentType() {

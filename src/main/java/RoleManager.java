@@ -1,15 +1,12 @@
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class RoleManager implements Repository<Role>{
-    public Map<String, Role> data;
-    public Map<String,Role> dataIndex;
+    public Map<String, Role> data = new HashMap<String, Role>();
+    public Map<String,Role> dataIndex = new HashMap<String, Role>();
     @Override
     public void add(Role item) {
-        if(item != null && !exists(item.name)) {
+        if(item != null && (data.get(item.id) == null)) {
             data.put(item.id,item);
             dataIndex.put(item.name,item);
         }

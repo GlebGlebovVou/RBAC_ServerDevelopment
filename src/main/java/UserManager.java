@@ -2,7 +2,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class UserManager implements Repository<User>{
-    public Map<String,User> data;
+    public Map<String,User> data = new HashMap<String, User>();
 
     @Override
     public void add(User item) {
@@ -22,7 +22,7 @@ public class UserManager implements Repository<User>{
 
     @Override
     public List<User> findAll() {
-        return (List<User>)data.values();
+        return data.values().stream().toList();
     }
 
     public List<User> findAll(UserFilter filter, Comparator<User> sorter) {
