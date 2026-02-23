@@ -1,5 +1,5 @@
 @FunctionalInterface
-interface UserFilter {
+public interface UserFilter {
     boolean test(User user);
     default UserFilter and(UserFilter other) {
         return (User user) -> this.test(user) && other.test(user);
