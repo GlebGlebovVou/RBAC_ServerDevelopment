@@ -1,6 +1,7 @@
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 import java.util.List;
+import java.io.*;
 
 public class Main {
     static void testValidation() {

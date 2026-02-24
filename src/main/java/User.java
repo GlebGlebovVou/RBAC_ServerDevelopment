@@ -1,4 +1,5 @@
 import java.util.regex.*;
+import java.io.*;
 
 public record User(String username, String fullName, String email) {
     static public User validate(String username, String fullName, String email) {

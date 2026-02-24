@@ -12,16 +12,17 @@ public class AssignmentManagerTest {
     User v = new User("qqqq","gfgf","vou@ogo.com");
     Role r = new Role("fqfq","fgfg");
     AssignmentMetadata m = new AssignmentMetadata("qqqq", LocalDateTime.now().toString(),"dfdf");
-    RoleAssignment u = new TemporaryAssignment(v,r,m);
+    TemporaryAssignment u = new TemporaryAssignment(v,r,m);
 
     @BeforeEach
     public void setUp() {
         manager = new AssignmentManager();
+        u.extend(LocalDateTime.now().plusHours(5).toString());
         manager.add(u);
         User v = new User("qqqa","gfgf","vou@ogo.com");
         Role r = new Role("fqfq","fgfg");
-        AssignmentMetadata m = new AssignmentMetadata("qqqq", LocalDateTime.now().plusHours(12).toString(),"dfdf");
-        RoleAssignment u1 = new TemporaryAssignment(v,r,m);
+        AssignmentMetadata m2 = new AssignmentMetadata("qqqq", LocalDateTime.now().toString(),"dfdf");
+        RoleAssignment u1 = new TemporaryAssignment(v,r,m2);
         manager.add(u1);
         User v1 = new User("gggq","gfgf","vou@ogo.com");
         Role r1 = new Role("ogo11","fgfgq");
@@ -66,12 +67,12 @@ public class AssignmentManagerTest {
 
     @Test
     public void userManager_getActiveAssignments() {
-        assertEquals(2,manager.getActiveAssignments().size());
+        assertEquals(1,manager.getActiveAssignments().size());
     }
 
     @Test
     public void userManager_getExpiredAssignments() {
-        assertEquals(0,manager.getExpiredAssignments().size());
+         assertEquals(1,manager.getExpiredAssignments().size());
     }
 
 }

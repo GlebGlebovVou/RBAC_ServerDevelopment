@@ -2,6 +2,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.io.*;
 
 public class Role {
     public String id;
