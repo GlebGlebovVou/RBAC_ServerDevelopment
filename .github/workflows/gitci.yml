@@ -22,10 +22,10 @@ jobs:
       - name: gradlew more rules
         run: chmod +x gradlew
 
-      - name: setup Java 17
+      - name: setup Java 25
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '25'
           distribution: 'temurin'
           cache: 'gradle'
 
