@@ -36,7 +36,7 @@ jobs:
 
       - name: build stage
         id: build
-        run: ./gradlew -q clean compileJava -Dfile.encoding=UTF-8
+        run: ./gradlew build
         env:
           GRADLE_OPTS: "-Dfile.encoding=UTF-8"
 
