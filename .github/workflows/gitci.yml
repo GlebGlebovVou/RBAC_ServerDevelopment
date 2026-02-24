@@ -57,3 +57,7 @@ jobs:
           name: demo-output
           path: demo-output.log
           retention-days: 7
+
+      - name: tests
+        id: test
+        run: ./gradlew test
