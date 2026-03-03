@@ -28,6 +28,7 @@ public class AssignmentManagerTest {
         AssignmentMetadata m1 = new AssignmentMetadata("qqqq", LocalDateTime.now().toString(),"dfdf");
         PermanentAssignment u2 = new PermanentAssignment(v1,r1,m1);
         manager.add(u2);
+        IO.println(u1.metadata().assignedAt());
         u2.revoke();
     }
 
