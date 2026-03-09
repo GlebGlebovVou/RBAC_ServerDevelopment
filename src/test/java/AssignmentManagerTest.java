@@ -1,5 +1,7 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,22 +16,74 @@ public class AssignmentManagerTest {
     AssignmentMetadata m = new AssignmentMetadata("qqqq", LocalDateTime.now().toString(),"dfdf");
     RoleAssignment u = new TemporaryAssignment(v,r,m);
 
+    private User mockUser(String username, String fullName, String email) {
+        User v = Mockito.mock(User.class);//new User("qqqa","gfgf","vou@ogo.com");
+        Mockito.when(v.email()).thenReturn(email);
+        Mockito.when(v.fullName()).thenReturn(fullName);
+        Mockito.when(v.username()).thenReturn(username);
+        return v;
+    }
+
+    private Role mockRole(String name, String description) {
+        Role v = Mockito.mock(Role.class);
+        Mockito.when(v.name).thenReturn(name);
+        Mockito.when(v.description).thenReturn(description);
+        return v;
+    }
+
+    private AssignmentMetadata mockAssignmentMetadata(String assignedBy, String assignedAt, String reason) {
+        AssignmentMetadata v = Mockito.mock(AssignmentMetadata.class);
+        Mockito.when(v.assignedAt()).thenReturn(assignedAt);
+        Mockito.when(v.assignedBy()).thenReturn(assignedBy);
+        Mockito.when(v.reason()).thenReturn(reason);
+        return v;
+    }
+
+    private RoleAssignment mockAssignment(User u, Role r, AssignmentMetadata m) {
+        RoleAssignment v = Mockito.mock(PermanentAssignment.class);
+        Mockito.when(v.role()).thenReturn(r);
+        Mockito.when(v.user()).thenReturn(u);
+        Mockito.when(v.metadata()).thenReturn(m);
+        return v;
+    }
+
+    private PermanentAssignment mockPermanentAssignment(User u, Role r, AssignmentMetadata m, boolean revoked) {
+        PermanentAssignment v = (PermanentAssignment) mockAssignment(u,r,m);
+        Mockito.when(v.user).thenReturn(u);
+        Mockito.when(v.metadata).thenReturn(m);
+        Mockito.when(v.revoked).thenReturn(revoked);
+        Mockito.when(v.isRevoked()).thenReturn(revoked);
+        return v;
+    }
+
+    private TemporaryAssignment mockTemporaryAssignment(User u, Role r, AssignmentMetadata m, boolean expired) {
+        TemporaryAssignment v = (TemporaryAssignment) mockAssignment(u,r,m);;
+        Mockito.when(v.isExpired()).thenReturn(expired);
+        return v;
+    }
+
     @BeforeEach
     public void setUp() {
-        manager = new AssignmentManager();
-        manager.add(u);
-        User v = new User("qqqa","gfgf","vou@ogo.com");
+        /*
+        User v = new User("qqqq","gfgf","vou@ogo.com");
         Role r = new Role("fqfq","fgfg");
-        AssignmentMetadata m = new AssignmentMetadata("qqqq", LocalDateTime.now().plusHours(12).toString(),"dfdf");
-        RoleAssignment u1 = new TemporaryAssignment(v,r,m);
-        manager.add(u1);
-        User v1 = new User("gggq","gfgf","vou@ogo.com");
-        Role r1 = new Role("ogo11","fgfgq");
-        AssignmentMetadata m1 = new AssignmentMetadata("qqqq", LocalDateTime.now().toString(),"dfdf");
-        PermanentAssignment u2 = new PermanentAssignment(v1,r1,m1);
-        manager.add(u2);
-        IO.println(u1.metadata().assignedAt());
-        u2.revoke();
+        AssignmentMetadata m = new AssignmentMetadata("qqqq", LocalDateTime.now().toString(),"dfdf");
+        RoleAssignment u = new TemporaryAssignment(v,r,m);
+         */
+        Mockito.when(DateUtils.getCurrentDate()).thenReturn("2020-06-30");
+        manager = new AssignmentManager();
+        User v = mockUser("qqqq","qfqf","vou@ogo.com");
+        Role r = mockRole("fqfq","fqfq");
+        AssignmentMetadata m = mockAssignmentMetadata("qqqq",DateUtils.getCurrentDate(),"dfdf");
+        manager.add(mockTemporaryAssignment(v,r,m,false));
+        User v1 = mockUser("qqqa","gfgf","vou@ogo.com");
+        Role r1 = mockRole("fqfq","fgfg");
+        AssignmentMetadata m1 = mockAssignmentMetadata("qqqq", DateUtils.getCurrentDate(),"dfdf");
+        manager.add(mockTemporaryAssignment(v,r,m,false));
+        User v2 = mockUser("gggq","gfgf","vou@ogo.com");
+        Role r2 = mockRole("ogo11","fgfgq");
+        AssignmentMetadata m2 = mockAssignmentMetadata("qqqq", DateUtils.getCurrentDate(),"dfdf");
+        manager.add(mockPermanentAssignment(v2,r2,m2,true));
     }
 
     @Test
