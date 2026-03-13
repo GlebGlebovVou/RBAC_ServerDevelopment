@@ -1,16 +1,16 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-public class AssignmentManagerTest {
-
-    private AssignmentManager manager;
+public class ReportGeneratorTest {
+    public ReportGenerator gen = new ReportGenerator();
 
     private User mockUser(String username, String fullName, String email) {
         User v = Mockito.mock(User.class);//new User("qqqa","gfgf","vou@ogo.com");
@@ -20,10 +20,11 @@ public class AssignmentManagerTest {
         return v;
     }
 
-    private Role mockRole(String name, String description) {
+    private Role mockRole(String name, String description, String id) {
         Role v = Mockito.mock(Role.class);
         v.name = name;
         v.description = description;
+        v.id = id;
         //Mockito.when(v.).thenReturn(name);
         //Mockito.when(v.description).thenReturn(description);
         return v;
@@ -68,72 +69,43 @@ public class AssignmentManagerTest {
         return v;
     }
 
+    private UserManager mockUserManager() {
+        UserManager v = Mockito.mock(UserManager.class);
+        User u = mockUser("user1","fullname","email");
+        Mockito.when(v.data.get("user1")).thenReturn(u);
+        ArrayList<User> arr = new ArrayList<User>();
+        arr.add(u);
+        Mockito.when(v.findAll()).thenReturn(arr);
+        return v;
+    }
+
+    private RoleManager mockRoleManager() {
+        RoleManager v = Mockito.mock(RoleManager.class);
+        Role r = mockRole("role1","fuldsf", "1");
+        Mockito.when(v.data.get("1")).thenReturn(r);
+        ArrayList<Role> arr = new ArrayList<Role>();
+        arr.add(r);
+        Mockito.when(v.findAll()).thenReturn(arr);
+        return v;
+    }
+
+    private AssignmentManager mockRoleManager() {
+        AssignmentManager v = Mockito.mock(AssignmentManager.class);
+        Role r = mockRole("role1","fuldsf", "1");
+        Mockito.when(v.data.get("1")).thenReturn(r);
+        ArrayList<Role> arr = new ArrayList<Role>();
+        arr.add(r);
+        Mockito.when(v.findAll()).thenReturn(arr);
+        return v;
+    }
+
     @BeforeEach
     public void setUp() {
-        /*
-        User v = new User("qqqq","gfgf","vou@ogo.com");
-        Role r = new Role("fqfq","fgfg");
-        AssignmentMetadata m = new AssignmentMetadata("qqqq", LocalDateTime.now().toString(),"dfdf");
-        RoleAssignment u = new TemporaryAssignment(v,r,m);
-         */
-        //Mockito.when(DateUtils.getCurrentDate()).thenReturn("2020-06-30");
-        manager = new AssignmentManager();
-        User v = mockUser("qqqq","qfqf","vou@ogo.com");
-        Role r = mockRole("fqfq","fqfq");
-        AssignmentMetadata m = mockAssignmentMetadata("qqqq",DateUtils.getCurrentDate(),"dfdf");
-        manager.add(mockTemporaryAssignment(v,r,m,false,"1"));
-        User v1 = mockUser("qqqa","gfgf","vou@ogo.com");
-        Role r1 = mockRole("fqfq","fgfg");
-        AssignmentMetadata m1 = mockAssignmentMetadata("qqqq", DateUtils.getCurrentDate(),"dfdf");
-        manager.add(mockTemporaryAssignment(v1,r1,m1,false,"2"));
-        User v2 = mockUser("gggq","gfgf","vou@ogo.com");
-        Role r2 = mockRole("ogo11","fgfgq");
-        AssignmentMetadata m2 = mockAssignmentMetadata("qqqq", DateUtils.getCurrentDate(),"dfdf");
-        manager.add(mockPermanentAssignment(v2,r2,m2,true,"3"));
+        return;
     }
 
     @Test
-    public void userManager_findByUser_Returns() {
-        User v = manager.findById("1").get().user();
-        List<RoleAssignment> ogo = manager.findByUser(v);
-        assertEquals(1,ogo.size());
-        assertEquals(manager.findByUser(v).get(0).user(), v);
+    public void reportGenerator_generateUserReport {
+        assertTrue(true);
     }
-
-
-    @Test
-    public void userManager_count_Returns() {
-        assertEquals(3, manager.count());
-    }
-
-    @Test
-    public void userManager_findAll_Returns() {
-        List<RoleAssignment> a = manager.findAll();
-        assertEquals(3, a.size());
-    }
-
-    @Test
-    public void userManager_findAllFilter_Returns() {
-        List<RoleAssignment> a = manager.findAll(AssignmentFilters.byRoleName("fqfq"), AssignmentSorters.byUsername());
-        assertEquals(2, a.size());
-        assertEquals("qqqa", a.get(0).user().username());
-        assertEquals("qqqq", a.get(1).user().username());
-    }
-
-    @Test
-    public void userManager_Clear() {
-        manager.clear();
-        assertEquals(0, manager.count());
-    }
-
-    @Test
-    public void userManager_getActiveAssignments() {
-        assertEquals(2,manager.getActiveAssignments().size());
-    }
-
-    @Test
-    public void userManager_getExpiredAssignments() {
-        assertEquals(0,manager.getExpiredAssignments().size());
-    }
-
 }

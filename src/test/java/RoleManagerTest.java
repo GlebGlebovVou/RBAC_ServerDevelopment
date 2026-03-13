@@ -1,30 +1,60 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class RoleManagerTest {
 
     private RoleManager manager;
-    Role u = new Role("ogo1", "cool");
+
+    private Role mockRole(String name, String description, String id) {
+        Role v = Mockito.mock(Role.class);
+        v.name = name;
+        v.description = description;
+        v.id = id;
+        //Mockito.when(v.).thenReturn(name);
+        //Mockito.when(v.description).thenReturn(description);
+        return v;
+    }
+
+    private Permission mockPermission(String name, String resource, String description) {
+        Permission v = Mockito.mock(Permission.class);
+        Mockito.when(v.description()).thenReturn(description);
+        Mockito.when(v.name()).thenReturn(name);
+        Mockito.when(v.resource()).thenReturn(resource);
+        return v;
+    }
 
     @BeforeEach
     public void setUp() {
         manager = new RoleManager();
+        Role u = mockRole("ogo1", "cool","1");
         manager.add(u);
-        Role u1 = new Role("ogo", "cool1");
-        Role u2 = new Role("vou", "cool2");
-        u1.addPermission(new Permission("nice", "1", "1fd"));
-        u2.addPermission(new Permission("nice1", "12", "1fd3"));
+
+        Role u1 = mockRole("ogo", "cool1","2");
+        Role u2 = mockRole("vou", "cool2","3");
+        Permission v1 = mockPermission("nice", "1", "1fd");
+        Permission v2 = mockPermission("nice1", "12", "1fd3");
+        HashSet<Permission> k1 = new HashSet<Permission>();
+        k1.add(v1);
+        Mockito.when(u1.hasPermission("nice","1")).thenReturn(true);
+        Mockito.when(u1.getPermissions()).thenReturn(k1);
+        HashSet<Permission> k2 = new HashSet<Permission>();
+        k2.add(v2);
+        Mockito.when(u1.hasPermission("nice1","12")).thenReturn(true);
+        Mockito.when(u2.getPermissions()).thenReturn(k2);
         manager.add(u1);
         manager.add(u2);
     }
 
     @Test
     public void userManager_findByName_Returns() {
-        assertEquals(manager.findByName("ogo1").get(), u);
+        assertEquals(manager.findByName("ogo1").get(), manager.findById("1").get());
     }
 
 
@@ -44,12 +74,12 @@ public class RoleManagerTest {
         List<Role> a = manager.findAll(RoleFilters.byName("ogo"), RoleSorters.byPermissionCount());
         assertEquals(1, a.size());
         assertEquals("ogo", a.get(0).name);
-        assertEquals(1, a.get(0).permissions.size());
+        assertEquals(1, a.get(0).getPermissions().size());
     }
 
     @Test
     public void userManager_Exists() {
-        assertTrue(manager.exists(u.name));
+        assertTrue(manager.exists(manager.findById("1").get().name));
     }
 
     @Test
