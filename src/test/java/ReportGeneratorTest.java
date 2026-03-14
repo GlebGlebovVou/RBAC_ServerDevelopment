@@ -11,6 +11,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ReportGeneratorTest {
     public ReportGenerator gen = new ReportGenerator();
+    public UserManager uman;
+    public RoleManager rman;
+    public AssignmentManager aman;
 
     private User mockUser(String username, String fullName, String email) {
         User v = Mockito.mock(User.class);//new User("qqqa","gfgf","vou@ogo.com");
@@ -89,23 +92,27 @@ public class ReportGeneratorTest {
         return v;
     }
 
-    private AssignmentManager mockRoleManager() {
+    private AssignmentManager mockAssignmenntManager(User u, Role r1) {
         AssignmentManager v = Mockito.mock(AssignmentManager.class);
-        Role r = mockRole("role1","fuldsf", "1");
+        PermanentAssignment r = mockPermanentAssignment(u, r1,
+                mockAssignmentMetadata("ogo",DateUtils.getCurrentDate(),"give me the reason"),
+                false,"1");
         Mockito.when(v.data.get("1")).thenReturn(r);
-        ArrayList<Role> arr = new ArrayList<Role>();
-        arr.add(r);
-        Mockito.when(v.findAll()).thenReturn(arr);
         return v;
     }
 
     @BeforeEach
     public void setUp() {
-        return;
+        this.uman = mockUserManager();
+        this.rman = mockRoleManager();
+        this.aman = mockAssignmenntManager(uman.data.get("user1"),rman.data.get("1"));
     }
 
     @Test
-    public void reportGenerator_generateUserReport {
-        assertTrue(true);
+    public void reportGenerator_generateUserReport() {
+        String res = gen.generateUserReport(uman,aman);
+        IO.println("cool");
+        IO.println(res);
+        //assertEquals(res,)
     }
 }
