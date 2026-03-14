@@ -7,6 +7,8 @@ import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ReportGeneratorTest {
@@ -75,7 +77,7 @@ public class ReportGeneratorTest {
     private UserManager mockUserManager() {
         UserManager v = Mockito.mock(UserManager.class);
         User u = mockUser("user1","fullname","email");
-        Mockito.when(v.data.get("user1")).thenReturn(u);
+        Mockito.when(v.findById("user1")).thenReturn(Optional.of(u));
         ArrayList<User> arr = new ArrayList<User>();
         arr.add(u);
         Mockito.when(v.findAll()).thenReturn(arr);
@@ -85,19 +87,22 @@ public class ReportGeneratorTest {
     private RoleManager mockRoleManager() {
         RoleManager v = Mockito.mock(RoleManager.class);
         Role r = mockRole("role1","fuldsf", "1");
-        Mockito.when(v.data.get("1")).thenReturn(r);
+        Mockito.when(v.findById("1")).thenReturn(Optional.of(r));
         ArrayList<Role> arr = new ArrayList<Role>();
         arr.add(r);
         Mockito.when(v.findAll()).thenReturn(arr);
         return v;
     }
 
-    private AssignmentManager mockAssignmenntManager(User u, Role r1) {
+    private AssignmentManager mockAssignmentManager(User u, Role r1) {
         AssignmentManager v = Mockito.mock(AssignmentManager.class);
         PermanentAssignment r = mockPermanentAssignment(u, r1,
                 mockAssignmentMetadata("ogo",DateUtils.getCurrentDate(),"give me the reason"),
                 false,"1");
-        Mockito.when(v.data.get("1")).thenReturn(r);
+        Mockito.when(v.findById(("1"))).thenReturn(Optional.of(r));
+        ArrayList<RoleAssignment> uf = new ArrayList<RoleAssignment>();
+        uf.add(r);
+        Mockito.when(v.findByUser(u)).thenReturn(uf);
         return v;
     }
 
@@ -105,7 +110,8 @@ public class ReportGeneratorTest {
     public void setUp() {
         this.uman = mockUserManager();
         this.rman = mockRoleManager();
-        this.aman = mockAssignmenntManager(uman.data.get("user1"),rman.data.get("1"));
+        this.aman = mockAssignmentManager(uman.findById("user1").get(),rman.findById("1").get());
+        IO.println("MASTER OF GOON!");
     }
 
     @Test

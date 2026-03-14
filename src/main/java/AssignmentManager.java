@@ -15,12 +15,12 @@ public class AssignmentManager implements Repository<RoleAssignment>{
 
     @Override
     public boolean remove(RoleAssignment item) {
-        return data.remove(item.assignmentId()) != null;
+        return this.data.remove(item.assignmentId()) != null;
     }
 
     @Override
     public Optional<RoleAssignment> findById(String id){
-        return Optional.ofNullable(data.get(id));
+        return Optional.ofNullable(this.data.get(id));
     }
 
     @Override

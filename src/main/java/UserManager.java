@@ -17,7 +17,7 @@ public class UserManager implements Repository<User>{
 
     @Override
     public Optional<User> findById(String id){
-        return Optional.empty();
+        return Optional.ofNullable(this.data.get(id));
     }
 
     @Override
