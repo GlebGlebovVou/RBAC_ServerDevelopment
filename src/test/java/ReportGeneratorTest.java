@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +23,7 @@ public class ReportGeneratorTest {
         Mockito.when(v.email()).thenReturn(email);
         Mockito.when(v.fullName()).thenReturn(fullName);
         Mockito.when(v.username()).thenReturn(username);
+        Mockito.when(v.format()).thenReturn(String.format("%s (%s) <%s>",username,fullName,email));
         return v;
     }
 
@@ -30,8 +32,18 @@ public class ReportGeneratorTest {
         v.name = name;
         v.description = description;
         v.id = id;
+        Mockito.when(v.format()).thenReturn(String.format("Role: %s [ID: %s]\nDescription: %s\nPermissions:",name,id,
+                description));
         //Mockito.when(v.).thenReturn(name);
         //Mockito.when(v.description).thenReturn(description);
+        return v;
+    }
+
+    private Permission mockPermission(String name, String resource, String description) {
+        Permission v = Mockito.mock(Permission.class);
+        Mockito.when(v.resource()).thenReturn(resource);
+        Mockito.when(v.name()).thenReturn(name);
+        Mockito.when(v.description()).thenReturn(description);
         return v;
     }
 
@@ -103,6 +115,10 @@ public class ReportGeneratorTest {
         ArrayList<RoleAssignment> uf = new ArrayList<RoleAssignment>();
         uf.add(r);
         Mockito.when(v.findByUser(u)).thenReturn(uf);
+        Mockito.when(v.findByRole(r1)).thenReturn(uf);
+        Mockito.when(v.findAll()).thenReturn(uf);
+        Mockito.when(r.user()).thenReturn(u);
+        Mockito.when(r.role()).thenReturn(r1);
         return v;
     }
 
@@ -111,14 +127,33 @@ public class ReportGeneratorTest {
         this.uman = mockUserManager();
         this.rman = mockRoleManager();
         this.aman = mockAssignmentManager(uman.findById("user1").get(),rman.findById("1").get());
-        IO.println("MASTER OF GOON!");
     }
 
     @Test
     public void reportGenerator_generateUserReport() {
         String res = gen.generateUserReport(uman,aman);
-        IO.println("cool");
-        IO.println(res);
-        //assertEquals(res,)
+        assertEquals(res,"user1 (fullname) <email>\n"+ "Roles: Role: role1 [ID: 1]\n"+
+        "Description: fuldsf\n" +
+        "Permissions:\n");
+    }
+
+    @Test
+    public void reportGenerator_generateRoleReport() {
+        String res = gen.generateRoleReport(rman,aman);
+        assertEquals(res,"Role: role1 [ID: 1]\n"+
+        "Description: fuldsf\n" +
+        "Permissions:\n"+
+        "amount of users: 1\n\n");
+    }
+
+    @Test
+    public void reportGenerator_generatePermissionMatrix() {
+        HashSet<Permission> uf = new HashSet<Permission>();
+        Permission p = mockPermission("name","r","d");
+        uf.add(p);
+        Mockito.when(rman.findById("1").get().getPermissions()).thenReturn(uf);
+        String res = gen.generatePermissionMatrix(uman,aman);
+        assertEquals(res,"r\t\n"+
+                "user1\t+\t");
     }
 }

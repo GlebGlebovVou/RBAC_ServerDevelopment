@@ -16,7 +16,6 @@ public class ReportGenerator {
                 f.append(r.role().format());
                 f.append("\n");
             }
-            f.append("\n");
         }
         return f.toString();
     }
@@ -39,7 +38,6 @@ public class ReportGenerator {
     }
     String generatePermissionMatrix(UserManager userManager, AssignmentManager assignmentManager) {
         StringBuilder f = new StringBuilder();
-        f.append("\t");
         HashSet<String> resources = new HashSet<String>();
         List<Role> roles = new ArrayList<Role>();
         for(RoleAssignment a : assignmentManager.findAll()) {
@@ -55,6 +53,7 @@ public class ReportGenerator {
         }
         for(User i : userManager.findAll()) {
             f.append("\n");
+            f.append(i.username()).append("\t");
             HashSet<String> res = new HashSet<String>();
             List<RoleAssignment> r  = assignmentManager.findByUser(i);
             for(RoleAssignment u : r) {

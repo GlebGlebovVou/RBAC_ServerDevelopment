@@ -4,7 +4,7 @@ import java.util.Locale;
 import java.util.Scanner;
 
 public class ConsoleUtils {
-    String promptString(Scanner scanner, String message, boolean required) {
+    public static String promptString(Scanner scanner, String message, boolean required) {
         IO.print(message);
         while(true) {
             String a = scanner.next();
@@ -14,7 +14,7 @@ public class ConsoleUtils {
             IO.println("Error");
         }
     }
-    int promptInt(Scanner scanner, String message, int min, int max) {
+    public static int promptInt(Scanner scanner, String message, int min, int max) {
         while(true) {
             IO.print(message);
             int n = scanner.nextInt();
@@ -24,7 +24,7 @@ public class ConsoleUtils {
             IO.println("Error");
         }
     }
-    boolean promptYesNo(Scanner scanner, String message) {
+    public static boolean promptYesNo(Scanner scanner, String message) {
         while(true) {
             IO.print(message);
             String res = scanner.next().toLowerCase(Locale.ROOT);
