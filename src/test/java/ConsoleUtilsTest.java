@@ -13,13 +13,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ConsoleUtilsTest {
     Scanner scan;
     private ByteArrayOutputStream uf = new ByteArrayOutputStream();
+    private InputStream ogo = new ByteArrayInputStream("".getBytes());
     private final PrintStream orig = System.out;
     private final InputStream originalSystemIn = System.in;
 
+    private void writeInput(String input) {
+        try {System.in.read(input.getBytes());}
+        catch (Exception e) {
+            IO.println("some error");
+        }
+    }
+
     @BeforeEach
     void setUp() {
-        scan = Mockito.mock(Scanner.class);
         System.setOut(new PrintStream(uf));
+        System.setIn(ogo);
     }
 
     @AfterEach
@@ -30,38 +38,32 @@ public class ConsoleUtilsTest {
 
     @Test
     public void consoleUtils_promptString() {
-        InputStream ogo = new ByteArrayInputStream("input nice".getBytes());
-        InputStream ogo1 = new ByteArrayInputStream("ogo".getBytes());
-        try {
-            System.setIn(ogo);
-            Scanner scan = new Scanner(System.in);
-            String res = ConsoleUtils.promptString(scan, "input mes", true);
-            assertEquals(res, "input nice");
-            assertEquals(uf.toString(),"input mes");
-            System.setIn(ogo1);
-            Scanner scan1 = new Scanner(ogo1);
-            String res1 = ConsoleUtils.promptString(scan1, "input mes", true);
-            assertEquals(res1, null);
-            assertEquals(uf.toString(),"input mes");
+        writeInput("input nice");
+        InputStream ogo = new ByteArrayInputStream("".getBytes());
+        try {ogo.read("input nice".getBytes());}
+        catch (Exception e) {
+            IO.println("some error");
         }
-        finally {
-            System.setIn(originalSystemIn);
-        }
+        Scanner scan = new Scanner(ogo);
+        writeInput("input nice");
+        String res = ConsoleUtils.promptString(scan, "input mes", true);
+        assertEquals(res, "input nice");
+        assertEquals(uf.toString(),"input mes");
+        writeInput("");
+        System.out.close();
+        res = ConsoleUtils.promptString(scan, "input mes", true);
+        assertEquals(res, null);
+        assertEquals(uf.toString(),"input mes");
     }
 
     @Test
     public void consoleUtils_promptInt() {
-        InputStream originalSystemIn = System.in;
-        InputStream ogo = new ByteArrayInputStream("input nice".getBytes());
-        try {
-            System.setIn(ogo);
-            Scanner scan = new Scanner(System.in);
-            String res = ConsoleUtils.promptString(scan, "input mes", true);
-            assertEquals(res, "input nice");
-            assertEquals(uf.toString(),"input mes");
-        }
-        finally {
-            System.setIn(originalSystemIn);
-        }
+        writeInput("55");
+        Scanner scan = new Scanner(System.in);
+        int res = ConsoleUtils.promptInt(scan, "ogo", 1,1000);
+        assertEquals(res, 55);
+        assertEquals(uf.toString(),"ogo");
+        writeInput("10000");
+        res = ConsoleUtils.promptInt(scan, "ogo", 1,1000);
     }
 }

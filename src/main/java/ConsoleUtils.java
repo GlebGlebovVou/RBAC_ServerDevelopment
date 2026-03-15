@@ -1,23 +1,34 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Scanner;
+import java.util.*;
 
 public class ConsoleUtils {
     public static String promptString(Scanner scanner, String message, boolean required) {
         IO.print(message);
         while(true) {
-            String a = scanner.nextLine();
-            if(!required || !a.isEmpty()) {
-                return a;
+            String a;
+            try {
+                a = scanner.nextLine();
             }
-            IO.println("Error");
+            catch (NoSuchElementException e) {
+                if(required)
+                    continue;
+                return "";
+            }
+            catch(Exception e) {
+                continue;
+            }
+            return a;
         }
     }
     public static int promptInt(Scanner scanner, String message, int min, int max) {
         while(true) {
             IO.print(message);
-            int n = scanner.nextInt();
+            int n;
+            try {
+                n = scanner.nextInt();
+            }
+            catch(Exception e) {
+                continue;
+            }
             if(n >= min && n <= max) {
                 return n;
             }
