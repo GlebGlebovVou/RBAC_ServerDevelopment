@@ -7,7 +7,7 @@ public class ConsoleUtils {
     public static String promptString(Scanner scanner, String message, boolean required) {
         IO.print(message);
         while(true) {
-            String a = scanner.next();
+            String a = scanner.nextLine();
             if(!required || !a.isEmpty()) {
                 return a;
             }
