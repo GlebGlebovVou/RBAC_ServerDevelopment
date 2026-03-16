@@ -10,4 +10,10 @@ public record Permission(String name, String resource, String description) {
     boolean matches(String namePattern, String resourcePattern) {
         return name.matches(namePattern) && resource.matches(resourcePattern);
     }
+
+    @Override
+    public String toString() {
+        return format();
+    }
+
 }
