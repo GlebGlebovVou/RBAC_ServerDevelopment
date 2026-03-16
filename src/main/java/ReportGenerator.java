@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 public class ReportGenerator {
-    String generateUserReport(UserManager userManager, AssignmentManager assignmentManager) {
+    public static String generateUserReport(UserManager userManager, AssignmentManager assignmentManager) {
         StringBuilder f = new StringBuilder();
         for(User x : userManager.findAll()) {
             f.append(x.format());
@@ -19,7 +19,7 @@ public class ReportGenerator {
         }
         return f.toString();
     }
-    String generateRoleReport(RoleManager roleManager, AssignmentManager assignmentManager) {
+    public static String generateRoleReport(RoleManager roleManager, AssignmentManager assignmentManager) {
         StringBuilder f = new StringBuilder();
         for(Role x : roleManager.findAll()) {
             f.append(x.format());
@@ -36,7 +36,7 @@ public class ReportGenerator {
         }
         return f.toString();
     }
-    String generatePermissionMatrix(UserManager userManager, AssignmentManager assignmentManager) {
+    public static String generatePermissionMatrix(UserManager userManager, AssignmentManager assignmentManager) {
         StringBuilder f = new StringBuilder();
         HashSet<String> resources = new HashSet<String>();
         List<Role> roles = new ArrayList<Role>();
@@ -67,7 +67,7 @@ public class ReportGenerator {
         }
         return f.toString();
     }
-    void exportToFile(String report, String filename) throws IOException {
+    public static void exportToFile(String report, String filename) throws IOException {
         try(FileWriter w = new FileWriter(filename)) {
             w.write(report);
         }
