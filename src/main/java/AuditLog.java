@@ -22,7 +22,7 @@ public class AuditLog {
     void printLog() {
         for(AuditEntry x : entries) {
             IO.println(String.format("%s: %s by %s, target: %s, details: %s",x.timestamp(),
-                    x.performer(),x.action(),x.target(),x.details()));
+                    x.action(),x.performer(),x.target(),x.details()));
         }
     }
     void saveToFile(String filename) throws IOException {
