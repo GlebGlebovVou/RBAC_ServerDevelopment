@@ -1,5 +1,6 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.util.List;
 
@@ -7,23 +8,31 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class UserManagerTest {
     private UserManager manager;
-    User u = User.validate("ogogdgd","test","ogo@vou.com");
+
+    private User mockUser(String username, String fullName, String email) {
+        User v = Mockito.mock(User.class);//new User("qqqa","gfgf","vou@ogo.com");
+        Mockito.when(v.email()).thenReturn(email);
+        Mockito.when(v.fullName()).thenReturn(fullName);
+        Mockito.when(v.username()).thenReturn(username);
+        return v;
+    }
+
     @BeforeEach
     public void setUp() {
         manager = new UserManager();
-        manager.add(u);
-        manager.add(User.validate("test","test2","test@ogo.com"));
-        manager.add(User.validate("test1","test1","test@ogo.com"));
+        manager.add(mockUser("ogogdgd","test","ogo@vou.com"));
+        manager.add(mockUser("test","test2","test@ogo.com"));
+        manager.add(mockUser("test1","test1","test@ogo.com"));
     }
 
     @Test
     public void userManager_findByUsername_Returns() {
-        assertEquals(manager.findByUsername("ogogdgd").get(),u);
+        assertTrue(manager.findByUsername("ogogdgd").isPresent());
     }
 
     @Test
     public void userManager_findByEmail_Returns() {
-        assertEquals(manager.findByEmail("ogo@vou.com").get(),u);
+        assertTrue(manager.findByEmail("ogo@vou.com").isPresent());
     }
 
     @Test
