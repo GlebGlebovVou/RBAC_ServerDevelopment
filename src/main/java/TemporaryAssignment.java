@@ -1,7 +1,7 @@
 import java.time.LocalDateTime;
 
 public class TemporaryAssignment extends AbstractRoleAssignment {
-    public String expiresAt = LocalDateTime.now().toString();
+    public String expiresAt = DateUtils.getCurrentDate();
 
     public boolean autoRenew;
 
@@ -19,7 +19,7 @@ public class TemporaryAssignment extends AbstractRoleAssignment {
     }
 
     boolean isExpired() {
-        return LocalDateTime.now().toString().compareTo(expiresAt) <= 0;
+        return DateUtils.getCurrentDateTime().compareTo(expiresAt) <= 0;
     }
 
     @Override

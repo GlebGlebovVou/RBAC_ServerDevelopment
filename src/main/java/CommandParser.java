@@ -1,7 +1,4 @@
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 public class CommandParser {
     static Map<String,Command> commands = new HashMap<String,Command>();
@@ -32,7 +29,7 @@ public class CommandParser {
     static void parseAndExecute(String input, Scanner scanner, RBACSystem system) {
         String[] split = input.split(" ");
         String name = split[0];
-        String[] args = (String[]) Arrays.stream(split).skip(1).toArray();
+        String[] args = Arrays.stream(split).skip(1).toArray(String[]::new);
         executeCommand(split[0],scanner,system,args);
     }
 }
