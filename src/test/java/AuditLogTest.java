@@ -24,20 +24,20 @@ public class AuditLogTest {
 
     @Test
     public void auditLog_getAll() {
-        assertEquals(log.getAll().size(),3);
-        assertEquals(log.getAll().getFirst().action(),"smth");
+        assertEquals(3, log.getAll().size());
+        assertEquals("smth", log.getAll().getFirst().action());
     }
 
     @Test
     public void auditLog_getByPerformer() {
-        assertEquals(log.getByPerformer("vou").size(),2);
-        assertEquals(log.getByPerformer("vou").getFirst().details(),"dsf");
+        assertEquals(2, log.getByPerformer("vou").size());
+        assertEquals("dsf", log.getByPerformer("vou").getFirst().details());
     }
 
     @Test
     public void auditLog_getByAction() {
-        assertEquals(log.getByAction("smth").size(),2);
-        assertEquals(log.getByAction("smth").getFirst().target(),"smth");
+        assertEquals(2, log.getByAction("smth").size());
+        assertEquals("smth", log.getByAction("smth").getFirst().target());
     }
 
 }

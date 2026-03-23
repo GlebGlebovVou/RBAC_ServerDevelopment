@@ -30,6 +30,7 @@ public class ConsoleUtils {
                 continue;
             }
             if(n >= min && n <= max) {
+                scanner.nextLine();
                 return n;
             }
             IO.println("Error");

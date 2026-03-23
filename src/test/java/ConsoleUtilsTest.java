@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ConsoleUtilsTest {
     Scanner scan;
@@ -40,12 +41,12 @@ public class ConsoleUtilsTest {
         System.setIn(ogo);
         Scanner scan = new Scanner(ogo);
         String res = ConsoleUtils.promptString(scan, "input mes", false);
-        assertEquals(res, "input nice");
-        assertEquals(uf.toString(),"input mes");
+        assertEquals("input nice", res);
+        assertEquals("input mes", uf.toString());
         System.out.close();
         res = ConsoleUtils.promptString(scan, "input mes", false);
-        assertEquals(res, "");
-        assertEquals(uf.toString(),"input mes");
+        assertEquals("", res);
+        assertEquals("input mes", uf.toString());
     }
 
     @Test
@@ -54,8 +55,8 @@ public class ConsoleUtilsTest {
         System.setIn(ogo);
         Scanner scan = new Scanner(ogo);
         int res = ConsoleUtils.promptInt(scan, "ogo", 1,1000);
-        assertEquals(res, 55);
-        assertEquals(uf.toString(),"ogo");
+        assertEquals(55, res);
+        assertEquals("ogo", uf.toString());
     }
 
     @Test
@@ -64,8 +65,8 @@ public class ConsoleUtilsTest {
         System.setIn(ogo);
         Scanner scan = new Scanner(ogo);
         boolean res = ConsoleUtils.promptYesNo(scan, "m");
-        assertEquals(res, true);
-        assertEquals(uf.toString(),"m");
+        assertTrue(res);
+        assertEquals("m", uf.toString());
     }
 
     @Test

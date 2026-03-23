@@ -9,13 +9,15 @@ public class CommandRegistry {
         registerRoleControl();
         registerAssignmentControl();
         registerPermissionsView();
+        registerReportView();
+        logCommands();
         systemCommands();
     }
 
     static public Command user_list() {
         return (scanner,system,args)-> {
             List<User> listOfUsers = system.getUserManager().findAll();
-            if(args.length > 1) {
+            if(args != null && args.length > 1) {
                 String filterName = args[0];
                 String filterKey = args[1];
                 switch(filterName) {
@@ -35,7 +37,7 @@ public class CommandRegistry {
                 String[] arr = {u.username(),u.fullName(),u.email()};
                 users.add(arr);
             }
-            FormatUtils.formatTable(names,users);
+            IO.println(FormatUtils.formatTable(names,users));
         };
     }
 
@@ -51,7 +53,7 @@ public class CommandRegistry {
                 return;
             }
             system.getUserManager().add(User.validate(username,fullname,email));
-            if(system.getUserManager().count() != old_size) {
+            if(system.getUserManager().count() == old_size) {
                 IO.println("This user is probably already contains; try user-update");
             }
         };
@@ -83,7 +85,7 @@ public class CommandRegistry {
             for(Role r : roles) {
                 IO.println(r.format());
             }
-            IO.println("Permissions:");
+            IO.println("Permissions of user:");
             for(Permission p : permissions) {
                 IO.println(p.format());
             }
@@ -135,17 +137,16 @@ public class CommandRegistry {
             filters.add("fullname");
             String filterName = ConsoleUtils.promptChoice(scanner,"Select search type: ",filters);
             String filterKey = ConsoleUtils.promptString(scanner,"Input key: ",true);
-            List<User> listOfUsers = null;
-            switch(filterName) {
-                case "username":
-                    listOfUsers = system.getUserManager().findByFilter(UserFilters.byUsernameContains(filterKey));
-                case "email":
-                    listOfUsers = system.getUserManager().findByFilter(UserFilters.byEmail(filterKey));
-                case "emailDomain":
-                    listOfUsers = system.getUserManager().findByFilter(UserFilters.byEmailDomain(filterKey));
-                case "fullname":
-                    listOfUsers = system.getUserManager().findByFilter(UserFilters.byFullNameContains(filterKey));
-            }
+            IO.print(filterName);
+            IO.println(filterKey);
+            List<User> listOfUsers = switch (filterName) {
+                case "username" -> system.getUserManager().findByFilter(UserFilters.byUsernameContains(filterKey));
+                case "email" -> system.getUserManager().findByFilter(UserFilters.byEmail(filterKey));
+                case "emailDomain" -> system.getUserManager().findByFilter(UserFilters.byEmailDomain(filterKey));
+                case "fullname" -> system.getUserManager().findByFilter(UserFilters.byFullNameContains(filterKey));
+                default -> null;
+            };
+            assert listOfUsers != null;
             for(User u : listOfUsers) {
                 IO.println(FormatUtils.formatBox(u.format()));
             }
@@ -213,8 +214,10 @@ public class CommandRegistry {
                 return;
             }
             Role r = role.get();
+            system.getRoleManager().remove(r);
             r.name = ConsoleUtils.promptString(scanner,"Input new role name: ",true);
             r.description = ConsoleUtils.promptString(scanner,"Input new role description: ",true);
+            system.getRoleManager().add(r);
         };
     }
 
@@ -240,7 +243,6 @@ public class CommandRegistry {
                 return;
             }
             Role r = role.get();
-            system.getRoleManager().remove(r);
             String name1 = ConsoleUtils.promptString(scanner,"Input permission name",true);
             String resource = ConsoleUtils.promptString(scanner,"Input permission resource",true);
             String description = ConsoleUtils.promptString(scanner,"Input permission description",true);
@@ -258,8 +260,8 @@ public class CommandRegistry {
                 return;
             }
             Role r = role.get();
-            List<Permission> p = r.getPermissions().stream().toList();
-            system.getRoleManager().remove(r);
+            List<Permission> p = r.getPermissions().stream().toList().stream().sorted((p1, p2) -> p1.name().compareTo(p2.name())).toList();
+            //system.getRoleManager().remove(r);
             Permission ans = ConsoleUtils.promptChoice(scanner,"Chose permission: ",p);
             r.removePermission(ans);
         };
@@ -274,22 +276,24 @@ public class CommandRegistry {
             List<Role> roles = new ArrayList<Role>();
             String name = ConsoleUtils.promptChoice(scanner,"Choice filter: ",vars);
             String key;
-            if(args.length > 0) {
+            if(args != null && args.length > 0) {
                 key = args[0];
             }
             else {
                 key = ConsoleUtils.promptString(scanner,"Input key: ",false);
             }
-            switch(name) {
-                case "nameContains":
-                    roles = system.getRoleManager().findByFilter(RoleFilters.byNameContains(key));
-                case "permission":
+            roles = switch (name) {
+                case "nameContains" -> system.getRoleManager().findByFilter(RoleFilters.byNameContains(key));
+                case "permission" -> {
                     String resource = ConsoleUtils.promptString(scanner, "Input key (description): ", false);
-                    roles = system.getRoleManager().findByFilter(RoleFilters.hasPermission(key, resource));
-                case "minimalAmountOfPermission":
+                    yield system.getRoleManager().findByFilter(RoleFilters.hasPermission(key, resource));
+                }
+                case "minimalAmountOfPermission" -> {
                     int key1 = Integer.parseInt(key);
-                    roles = system.getRoleManager().findByFilter(RoleFilters.hasAtLeastNPermissions(key1));
-            }
+                    yield system.getRoleManager().findByFilter(RoleFilters.hasAtLeastNPermissions(key1));
+                }
+                default -> roles;
+            };
             for(Role r : roles) {
                 IO.println(r.format());
             }
@@ -305,7 +309,7 @@ public class CommandRegistry {
         CommandParser.registerCommand("role-update","Update information about role",role_update());
         CommandParser.registerCommand("role-delete","Delete role",role_delete());
         CommandParser.registerCommand("role-add-permission","Add permission to role",role_add_permission());
-        CommandParser.registerCommand("role-remove-permission","Add permission to role",role_add_permission());
+        CommandParser.registerCommand("role-remove-permission","Add permission to role",role_remove_permission());
         CommandParser.registerCommand("role-search","Search roles by filters",role_search());
     }
 
@@ -328,12 +332,11 @@ public class CommandRegistry {
             String reason = ConsoleUtils.promptString(scanner,"Describe reason: ",false);
             AssignmentMetadata metadata = new AssignmentMetadata(system.getCurrentUser(), DateUtils.getCurrentDateTime(),
                     reason);
-            switch(type) {
-                case "Permanent":
-                    assignment = new PermanentAssignment(user,role,metadata);
-                case "Temporary":
-                    assignment = new TemporaryAssignment(user,role,metadata);
-            }
+            assignment = switch (type) {
+                case "Permanent" -> new PermanentAssignment(user, role, metadata);
+                case "Temporary" -> new TemporaryAssignment(user, role, metadata);
+                default -> assignment;
+            };
             system.getAssignmentManager().add(assignment);
         };
     }
@@ -349,12 +352,10 @@ public class CommandRegistry {
             User user = userT.get();
             List<RoleAssignment> assignments = system.getAssignmentManager().findByUser(user);
             RoleAssignment assignment = ConsoleUtils.promptChoice(scanner,"Choice assignment",assignments);
-            if(assignment instanceof PermanentAssignment) {
-                PermanentAssignment perm = (PermanentAssignment)assignment;
+            if(assignment instanceof PermanentAssignment perm) {
                 perm.revoke();
             }
-            else if (assignment instanceof TemporaryAssignment) {
-                TemporaryAssignment temp = (TemporaryAssignment)assignment;
+            else if (assignment instanceof TemporaryAssignment temp) {
                 temp.extend(DateUtils.getCurrentDateTime());
             }
         };
@@ -478,27 +479,34 @@ public class CommandRegistry {
             String choice = ConsoleUtils.promptChoice(scanner,"Choice filter: ",ogo);
             String key = ConsoleUtils.promptString(scanner,"Input key: ",true);
             List<RoleAssignment> assignments = null;
-            switch(choice) {
-                case "user":
+            assignments = switch(choice) {
+                case "user" -> {
                     User u = system.getUserManager().findById(key).get();
-                    assignments = system.getAssignmentManager().findByUser(u);
-                case "role":
+                    yield system.getAssignmentManager().findByUser(u);
+                }
+                case "role" -> {
                     Role r = system.getRoleManager().findByName(key).get();
-                    assignments = system.getAssignmentManager().findByRole(r);
-                case "type":
-                    assignments = system.getAssignmentManager().findByFilter(AssignmentFilters.byType(key));
-                case "status":
-                    if(key.equals("Active")) {
-                        assignments = system.getAssignmentManager().findByFilter(AssignmentFilters.activeOnly());
+                    yield system.getAssignmentManager().findByRole(r);
+                }
+                case "type" ->
+                    system.getAssignmentManager().findByFilter(AssignmentFilters.byType(key.toUpperCase(Locale.ROOT)));
+
+                case "status" -> {
+                    if(key.toLowerCase(Locale.ROOT).equals("active")) {
+                        yield system.getAssignmentManager().findByFilter(AssignmentFilters.activeOnly());
                     }
                     else {
-                        assignments = system.getAssignmentManager().findByFilter(AssignmentFilters.inactiveOnly());
+                        yield system.getAssignmentManager().findByFilter(AssignmentFilters.inactiveOnly());
                     }
-                case "assigned after":
-                    assignments = system.getAssignmentManager().findByFilter(AssignmentFilters.assignedAfter(key));
-                case "expiring before":
-                    assignments = system.getAssignmentManager().findByFilter(AssignmentFilters.expiringBefore(key));
-            }
+                }
+                case "assigned after" ->
+                    system.getAssignmentManager().findByFilter(AssignmentFilters.assignedAfter(key));
+
+                case "expiring before" ->
+                    system.getAssignmentManager().findByFilter(AssignmentFilters.expiringBefore(key));
+                default -> assignments;
+            };
+            assert assignments != null;
             for(RoleAssignment a : assignments) {
                 if(a instanceof PermanentAssignment) {
                     IO.println(((PermanentAssignment)a).summary());
@@ -532,7 +540,7 @@ public class CommandRegistry {
             User user = uT.get();
             HashMap<String, List<Permission>> permissions = new HashMap<String, List<Permission>>();
             for(RoleAssignment a : system.getAssignmentManager().findByUser(user)) {
-                Set<Permission> permissions1 = a.role().getPermissions();
+                List<Permission> permissions1 = a.role().getPermissions().stream().sorted((p1,p2) -> p1.name().compareTo(p2.name())).toList();
                 for(Permission p : permissions1) {
                     if(!permissions.containsKey(p.resource())) {
                         ArrayList<Permission> permissions2 = new ArrayList<Permission>();
@@ -600,7 +608,7 @@ public class CommandRegistry {
             String res = system.generateStatistics();
             IO.println(res);
             IO.println("----------");
-            IO.println(String.format("amount of players: %d",system.getUserManager().count()));
+            IO.println(String.format("amount of users: %d",system.getUserManager().count()));
             IO.println(String.format("amount of roles: %d",system.getRoleManager().count()));
             IO.println(String.format("amount of assignments: %d/%d/%d",system.getAssignmentManager().count(),
                     system.getAssignmentManager().getActiveAssignments().size(),
@@ -655,5 +663,39 @@ public class CommandRegistry {
         CommandParser.registerCommand("stats","Print main statistics",stats());
         CommandParser.registerCommand("clear","Clear screen",clear());
         CommandParser.registerCommand("exit","Finish program",exit());
+    }
+
+    static public Command audit_log() {
+        return (scanner, system, args) -> {
+            AuditLog.printLog();
+        };
+    }
+
+    static public void logCommands() {
+        CommandParser.registerCommand("audit-log", "Print audio-log", audit_log());
+    }
+
+    static public Command report_users() {
+        return (scanner, system, args) -> {
+            IO.println(ReportGenerator.generateUserReport(system.getUserManager(),system.getAssignmentManager()));
+        };
+    }
+
+    static public Command report_roles() {
+        return (scanner, system, args) -> {
+            IO.println(ReportGenerator.generateRoleReport(system.getRoleManager(),system.getAssignmentManager()));
+        };
+    }
+
+    static public Command report_matrix() {
+        return (scanner, system, args) -> {
+            IO.println(ReportGenerator.generatePermissionMatrix(system.getUserManager(),system.getAssignmentManager()));
+        };
+    }
+
+    static public void registerReportView() {
+        CommandParser.registerCommand("report-users","Create reports of users",report_users());
+        CommandParser.registerCommand("report-users","Create reports of roles",report_roles());
+        CommandParser.registerCommand("report-users","Create reports of users",report_matrix());
     }
 }

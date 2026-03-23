@@ -37,9 +37,9 @@ public class RBACSystem {
         rman.add(viewer);
         for(Permission i : permissions) {
             admin.addPermission(i);
-            if(!i.name().equals("DELETE")) {
+            if(!i.name().equals("delete")) {
                 manager.addPermission(i);
-                if(!i.name().equals("WRITE")) {
+                if(!i.name().equals("write")) {
                     viewer.addPermission(i);
                 }
             }

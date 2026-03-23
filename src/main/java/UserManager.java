@@ -48,6 +48,7 @@ public class UserManager implements Repository<User>{
     }
 
     public List<User> findByFilter(UserFilter filter) {
+        IO.println(data.values().stream().filter(filter::test).count());
         return data.values().stream().filter(filter::test).collect(Collectors.toList());
     }
 
