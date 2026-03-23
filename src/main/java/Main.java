@@ -1,5 +1,6 @@
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+import java.util.Arrays;
 import java.util.List;
 
 public class Main {
@@ -23,7 +24,7 @@ public class Main {
             IO.println();
         }
     }
-    static void main() {
+    static void main(String[] args) {
         testValidation();
         User us = User.validate("goal","cool","fdfd@gfg.");
         Permission p = new Permission("ogo","users","klluta");
@@ -36,5 +37,6 @@ public class Main {
         IO.println(a.summary());
         TemporaryAssignment b = new TemporaryAssignment(us,r,AssignmentMetadata.now("user","sadasd"));
         IO.println(b.summary());
+        Threads.main(null);
     }
 }
