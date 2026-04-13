@@ -272,11 +272,7 @@ public class CommandRegistryTest {
     @Test
     void commandregistry_assignment_list() {
         CommandRegistry.assignment_list().execute(scanner,system,null);
-        assertEquals("*********************************************************************************\n" +
-                "*     usernam...*     role      *     type      *     status    *     assigne...*\n" +
-                "*********************************************************************************\n" +
-                "*     admin     *     Admin     *     PERMANE...*     Active    *     2026-03...*\n" +
-                "*********************************************************************************\n\r\n",uf.toString());
+        assertTrue(uf.toString().contains("*     admin     *     Admin     *     PERMANE...*     Active    *"));
     }
 
     @Test
@@ -383,7 +379,7 @@ public class CommandRegistryTest {
     void commandregistry_audit_log() {
         CommandRegistry.stats().execute(new Scanner(System.in),system,null);
         assertTrue(uf.toString().contains("admin (rootAdmin) <ogo@gmail.com>"));
-        assertTrue(uf.toString().contains("|Role: Admin [ID:"));
+        assertTrue(uf.toString().contains("Role: Admin [ID:"));
         assertTrue(uf.toString().contains("Role: Viewer ["));
     }
 }

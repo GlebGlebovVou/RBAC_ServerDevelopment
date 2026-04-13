@@ -1,31 +1,42 @@
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 public class UserManager implements Repository<User>{
-    public Map<String,User> data = new HashMap<String, User>();
+
+    public ConcurrentMap<String,User> data = new ConcurrentHashMap<String, User>();
+    private final Object obj = new Object();
 
     @Override
     public void add(User item) {
-        if(item != null && !exists(item.username()))
+        if(item != null)
         {
-            data.put(item.username(),item);
+            data.putIfAbsent(item.username(),item);
         }
     }
 
     @Override
-    public boolean remove(User item){return data.remove(item.username()) != null;}
+    public boolean remove(User item){
+        if (item != null) {
+            synchronized (obj) {
+                return data.remove(item.username()) != null;
+            }
+        }
+        return false;
+    }
 
     @Override
-    public Optional<User> findById(String id){
+    public synchronized Optional<User> findById(String id){
         return Optional.ofNullable(this.data.get(id));
     }
 
     @Override
-    public List<User> findAll() {
+    public synchronized List<User> findAll() {
         return data.values().stream().toList();
     }
 
-    public List<User> findAll(UserFilter filter, Comparator<User> sorter) {
+    public synchronized List<User> findAll(UserFilter filter, Comparator<User> sorter) {
         return data.values().stream().filter(filter::test).sorted(sorter).collect(Collectors.toList());
     }
 
@@ -33,8 +44,8 @@ public class UserManager implements Repository<User>{
     public int count() {return data.size();}
 
     @Override
-    public void clear() {data.clear();}
-    public Optional<User> findByUsername(String username) {
+    public synchronized void clear() {data.clear();}
+    public synchronized Optional<User> findByUsername(String username) {
         return Optional.ofNullable(data.get(username));
     }
 
@@ -52,11 +63,11 @@ public class UserManager implements Repository<User>{
         return data.values().stream().filter(filter::test).collect(Collectors.toList());
     }
 
-    public boolean exists(String username) {
+    public synchronized boolean exists(String username) {
         return data.get(username) != null;
     }
 
-    public void update(String username, String newFullName, String newEmail) {
+    public synchronized void update(String username, String newFullName, String newEmail) {
         if(data.get(username) != null) {
             User u = User.validate(username,newFullName,newEmail);
             if(u != null) {

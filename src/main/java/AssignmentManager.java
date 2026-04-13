@@ -1,21 +1,30 @@
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 public class AssignmentManager implements Repository<RoleAssignment>{
-    public Map<String, RoleAssignment> data = new HashMap<String, RoleAssignment>();
+    public ConcurrentMap<String, RoleAssignment> data = new ConcurrentHashMap<String, RoleAssignment>();
+    private final Object obj = new Object();
 
     @Override
     public void add(RoleAssignment item) {
-        if(item != null)
+        RoleAssignment prev = data.putIfAbsent(item.assignmentId(),item);
+        if(prev != null)
         {
-            data.put(item.assignmentId(),item);
+            throw new IllegalArgumentException("Item with that id exists");
         }
+        AuditLog.log("ASSIGNMENT_ADD",item.metadata().assignedBy(),item.user().username(),item.metadata().reason());
     }
 
     @Override
     public boolean remove(RoleAssignment item) {
-        return this.data.remove(item.assignmentId()) != null;
+        if(this.data.remove(item.assignmentId()) != null) {
+            AuditLog.log("ASSIGNMENT_REMOVE",item.metadata().assignedBy(),item.user().username(),item.metadata().reason());
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -79,7 +88,7 @@ public class AssignmentManager implements Repository<RoleAssignment>{
         return a;
     }
 
-    void revokeAssignment(String assignmentId) {
+    public synchronized void revokeAssignment(String assignmentId) {
         Optional<RoleAssignment> a = findById(assignmentId);
         a.ifPresent(vou -> {
             if(vou.assignmentType().equals("PERMANENT")) {
@@ -88,7 +97,7 @@ public class AssignmentManager implements Repository<RoleAssignment>{
         });
     }
 
-    void extendTemporaryAssignment(String assignmentId, String newExpirationDate) {
+    public synchronized void extendTemporaryAssignment(String assignmentId, String newExpirationDate) {
         Optional<RoleAssignment> a = findById(assignmentId);
         a.ifPresent(vou -> {
             if(vou.assignmentType().equals("TEMPORARY")) {

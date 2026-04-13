@@ -3,9 +3,10 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class AuditLog {
-    static List<AuditEntry> entries = new ArrayList<AuditEntry>();
+    static List<AuditEntry> entries = new CopyOnWriteArrayList<AuditEntry>();
     static public void log(String action, String performer, String target, String details) {
         AuditEntry e = new AuditEntry(LocalDateTime.now().toString(),action,performer,target,details);
         entries.add(e);
