@@ -75,4 +75,49 @@ public class ReportGenerator {
             throw new IOException();
         }
     }
+    public static String generateUserReportParallel(UserManager userManager, AssignmentManager assignmentManager) {
+        StringBuilder f = new StringBuilder();
+        userManager.findAll().parallelStream().forEach((User x) -> {
+            f.append(x.format());
+            f.append("\nRoles: ");
+            List<RoleAssignment> a = assignmentManager.findByUser(x);
+            for(RoleAssignment r : a) {
+                f.append(r.role().format());
+                f.append("\n");
+            }
+        });
+        return f.toString();
+    }
+    public static String generatePermissionMatrixParallel(UserManager userManager, AssignmentManager assignmentManager) {
+        StringBuilder f = new StringBuilder();
+        HashSet<String> resources = new HashSet<String>();
+        List<Role> roles = new ArrayList<Role>();
+        assignmentManager.findAll().parallelStream().forEach((RoleAssignment a) -> {
+            if (!roles.contains(a.role())) {
+                a.role().getPermissions().parallelStream().forEach((Permission g) -> {
+                    if(!resources.contains(g.resource())) {
+                        f.append(String.format("%s\t",g.resource()));
+                    }
+                    resources.add(g.resource());
+                });
+                roles.add(a.role());
+            }
+        });
+        userManager.findAll().parallelStream().forEach((User i) -> {
+            f.append("\n");
+            f.append(i.username()).append("\t");
+            HashSet<String> res = new HashSet<String>();
+            List<RoleAssignment> r  = assignmentManager.findByUser(i);
+            r.parallelStream().forEach((RoleAssignment u) -> {
+                u.role().getPermissions().parallelStream().forEach((Permission o) -> {
+                    res.add(o.resource());
+                });
+            }
+            );
+            for(String l : resources) {
+                f.append(res.contains(l) ? "+\t" : "-\t");
+            }
+        });
+        return f.toString();
+    }
 }

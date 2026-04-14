@@ -51,7 +51,7 @@ public class ConsoleUtilsTest {
 
     @Test
     public void consoleUtils_promptInt() {
-        ByteArrayInputStream ogo = new ByteArrayInputStream("55".getBytes());
+        ByteArrayInputStream ogo = new ByteArrayInputStream("55\n".getBytes());
         System.setIn(ogo);
         Scanner scan = new Scanner(ogo);
         int res = ConsoleUtils.promptInt(scan, "ogo", 1,1000);
@@ -71,7 +71,7 @@ public class ConsoleUtilsTest {
 
     @Test
     public void consoleUtils_promptChoice() {
-        ByteArrayInputStream ogo = new ByteArrayInputStream("1".getBytes());
+        ByteArrayInputStream ogo = new ByteArrayInputStream("1\n".getBytes());
         System.setIn(ogo);
         Scanner scan = new Scanner(ogo);
         List<String> list = new ArrayList<String>();

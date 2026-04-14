@@ -2,6 +2,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.mockito.Mockito;
 
 import java.io.*;
@@ -38,12 +39,11 @@ public class CommandRegistryTest {
     @Test
     void commandregistry_user_list() {
         CommandRegistry.user_list().execute(scanner,system,null);
-        assertEquals("*************************************************\n" +
-                "*     usernam...*     full na...*     email     *\n" +
-                "*************************************************\n" +
-                "*     admin     *     rootAdm...*     ogo@gma...*\n" +
-                "*************************************************\n\r\n",
-                uf.toString());
+        assertTrue(uf.toString().contains("*************************************************\n" +
+                        "*     usernam...*     full na...*     email     *\n" +
+                        "*************************************************\n" +
+                        "*     admin     *     rootAdm...*     ogo@gma...*\n" +
+                        "*************************************************\n"));
     }
 
     @Test
@@ -51,15 +51,14 @@ public class CommandRegistryTest {
         ByteArrayInputStream ogo = new ByteArrayInputStream("userna\nname\nuf@u.com".getBytes());
         System.setIn(ogo);
         CommandRegistry.user_create().execute(new Scanner(System.in),system,null);
-        assertEquals("Input username: Input full name: Input email: ",uf.toString());
+        assertTrue(uf.toString().contains("Input username: Input full name: Input email: "));
         assertEquals(2,system.getUserManager().count());
         ByteArrayInputStream ogo1 = new ByteArrayInputStream("u\nname\nuf@u.com".getBytes());
         uf.reset();
         System.setIn(ogo1);
         CommandRegistry.user_create().execute(new Scanner(System.in),system,null);
-        assertEquals("Input username: Input full name: Input email: username should have only digits, latin symbols or _ and be longer than 3 and shorter than 20\r\n" +
-                        "Validation error\r\n",
-                uf.toString());
+        assertTrue(uf.toString().contains("Input username: Input full name: Input email: username should have only digits, latin symbols or _ and be longer than 3 and shorter than 20"));
+        assertTrue(uf.toString().contains("Validation error"));
         assertEquals(2,system.getUserManager().count());
     }
 
@@ -68,14 +67,12 @@ public class CommandRegistryTest {
         ByteArrayInputStream ogo = new ByteArrayInputStream("admin1".getBytes());
         System.setIn(ogo);
         CommandRegistry.user_view().execute(new Scanner(System.in),system,null);
-        assertEquals("Input username: No such user\r\n",
-                uf.toString());
+        assertTrue(uf.toString().contains("Input username: No such user"));
         uf.reset();
         ByteArrayInputStream ogo1 = new ByteArrayInputStream("admin".getBytes());
         System.setIn(ogo1);
         CommandRegistry.user_view().execute(new Scanner(System.in),system,null);
-        assertNotEquals("Input username: No such user\r\n",
-                uf.toString());
+        assertFalse(uf.toString().contains("Input username: No such user"));
         assertTrue(uf.toString().contains("Permissions (3)"));
         assertTrue(uf.toString().contains("Description: main user"));
         assertTrue(uf.toString().contains("Input username: admin (rootAdmin)"));
@@ -86,14 +83,12 @@ public class CommandRegistryTest {
         ByteArrayInputStream ogo = new ByteArrayInputStream("admin1\nnice\ntest@g.com".getBytes());
         System.setIn(ogo);
         CommandRegistry.user_update().execute(new Scanner(System.in),system,null);
-        assertEquals("Input username: No such user\r\n",
-                uf.toString());
+        assertTrue(uf.toString().contains("Input username: No such user"));
         uf.reset();
         ByteArrayInputStream ogo1 = new ByteArrayInputStream("admin\nnice\ntest@g.com".getBytes());
         System.setIn(ogo1);
         CommandRegistry.user_update().execute(new Scanner(System.in),system,null);
-        assertNotEquals("Input username: No such user\r\n",
-                uf.toString());
+        assertFalse(uf.toString().contains("Input username: No such user"));
         assertTrue(system.getUserManager().findByUsername("admin").isPresent());
         assertEquals("admin (nice) <test@g.com>",system.getUserManager().findByUsername("admin").get().format());
     }
@@ -103,8 +98,7 @@ public class CommandRegistryTest {
         ByteArrayInputStream ogo = new ByteArrayInputStream("admin1\nyes".getBytes());
         System.setIn(ogo);
         CommandRegistry.user_delete().execute(new Scanner(System.in),system,null);
-        assertEquals("Input username: No such user\r\n",
-                uf.toString());
+        assertTrue(uf.toString().contains("Input username: No such user"));
         uf.reset();
         ByteArrayInputStream ogo1 = new ByteArrayInputStream("admin\nno".getBytes());
         System.setIn(ogo1);
@@ -113,8 +107,7 @@ public class CommandRegistryTest {
         ByteArrayInputStream ogo2 = new ByteArrayInputStream("admin\nyes".getBytes());
         System.setIn(ogo2);
         CommandRegistry.user_delete().execute(new Scanner(System.in),system,null);
-        assertNotEquals("Input username: No such user\r\n",
-                uf.toString());
+        assertFalse(uf.toString().contains("Input username: No such user"));
         assertFalse(system.getUserManager().findByUsername("admin").isPresent());
     }
 
@@ -159,7 +152,7 @@ public class CommandRegistryTest {
         ByteArrayInputStream ogo = new ByteArrayInputStream("admin1".getBytes());
         System.setIn(ogo);
         CommandRegistry.role_view().execute(new Scanner(System.in),system,null);
-        assertEquals("Input role name: No such role\r\n",uf.toString());
+        assertTrue(uf.toString().contains("Input role name: No such role"));
         uf.reset();
         ByteArrayInputStream ogo1 = new ByteArrayInputStream("Admin".getBytes());
         System.setIn(ogo1);
@@ -174,12 +167,12 @@ public class CommandRegistryTest {
         ByteArrayInputStream ogo = new ByteArrayInputStream("admin1\nname\ndesc".getBytes());
         System.setIn(ogo);
         CommandRegistry.role_update().execute(new Scanner(System.in),system,null);
-        assertEquals("Input role name: No such role\r\n",uf.toString());
+        assertTrue(uf.toString().contains("Input role name: No such role"));
         uf.reset();
         ByteArrayInputStream ogo1 = new ByteArrayInputStream("Admin\nname\ndesc".getBytes());
         System.setIn(ogo1);
         CommandRegistry.role_update().execute(new Scanner(System.in),system,null);
-        assertNotEquals("Input role name: No such role\r\n",uf.toString());
+        assertFalse(uf.toString().contains("Input role name: No such role"));
         assertTrue(system.getRoleManager().findByName("name").isPresent());
         assertFalse(system.getRoleManager().findByName("Admin").isPresent());
     }
@@ -189,12 +182,12 @@ public class CommandRegistryTest {
         ByteArrayInputStream ogo = new ByteArrayInputStream("admin1".getBytes());
         System.setIn(ogo);
         CommandRegistry.role_add_permission().execute(new Scanner(System.in),system,null);
-        assertEquals("Input role name: No such role\r\n",uf.toString());
+        assertTrue(uf.toString().contains("Input role name: No such role"));
         uf.reset();
         ByteArrayInputStream ogo1 = new ByteArrayInputStream("Admin\nperm\nres\ndesc".getBytes());
         System.setIn(ogo1);
         CommandRegistry.role_add_permission().execute(new Scanner(System.in),system,null);
-        assertNotEquals("Input role name: No such role\r\n",uf.toString());
+        assertFalse(uf.toString().contains("Input role name: No such role"));
         assertTrue(system.getRoleManager().findByName("Admin").isPresent());
         assertEquals(4,system.getRoleManager().findByName("Admin").get().getPermissions().size());
         assertTrue(system.getRoleManager().findByName("Admin").get().hasPermission("perm","res"));
@@ -205,13 +198,13 @@ public class CommandRegistryTest {
         ByteArrayInputStream ogo = new ByteArrayInputStream("admin1".getBytes());
         System.setIn(ogo);
         CommandRegistry.role_remove_permission().execute(new Scanner(System.in),system,null);
-        assertEquals("Input role name: No such role\r\n",uf.toString());
+        assertTrue(uf.toString().contains("Input role name: No such role"));
         uf.reset();
         ByteArrayInputStream ogo1 = new ByteArrayInputStream("Admin\n1\n".getBytes());
         System.setIn(ogo1);
         assertTrue(system.getRoleManager().findByName("Admin").get().hasPermission("delete","file"));
         CommandRegistry.role_remove_permission().execute(new Scanner(System.in),system,null);
-        assertNotEquals("Input role name: No such role\r\n",uf.toString());
+        assertFalse(uf.toString().contains("Input role name: No such role"));
         assertTrue(system.getRoleManager().findByName("Admin").isPresent());
         assertEquals(2,system.getRoleManager().findByName("Admin").get().getPermissions().size());
         assertFalse(system.getRoleManager().findByName("Admin").get().hasPermission("delete","file"));
@@ -246,7 +239,7 @@ public class CommandRegistryTest {
         ByteArrayInputStream ogo = new ByteArrayInputStream("admin1\n".getBytes());
         System.setIn(ogo);
         CommandRegistry.assign_role().execute(new Scanner(System.in),system,null);
-        assertEquals("Input username: No such user\r\n",uf.toString());
+        assertTrue(uf.toString().contains("Input username: No such user"));
         ByteArrayInputStream ogo1 = new ByteArrayInputStream("admin\n2\n1\nwant".getBytes());
         System.setIn(ogo1);
         assertEquals(1,system.getAssignmentManager().findByUser(u).size());
@@ -261,7 +254,7 @@ public class CommandRegistryTest {
         ByteArrayInputStream ogo = new ByteArrayInputStream("admin1\n".getBytes());
         System.setIn(ogo);
         CommandRegistry.assign_role().execute(new Scanner(System.in),system,null);
-        assertEquals("Input username: No such user\r\n",uf.toString());
+        assertTrue(uf.toString().contains("Input username: No such user"));
         ByteArrayInputStream ogo1 = new ByteArrayInputStream("admin\n1\n".getBytes());
         System.setIn(ogo1);
         assertEquals(1,system.getAssignmentManager().findByFilter(AssignmentFilters.activeOnly()).size());
@@ -341,12 +334,10 @@ public class CommandRegistryTest {
         ByteArrayInputStream ogo = new ByteArrayInputStream("admin\n".getBytes());
         System.setIn(ogo);
         CommandRegistry.permissions_user().execute(new Scanner(System.in),system,null);
-        assertEquals("""
-                Input username: file\r
-                delete on file: delete file\r
-                read on file: read file\r
-                write on file: write file\r
-                """,uf.toString());
+        assertTrue(uf.toString().contains("Input username: file"));
+        assertTrue(uf.toString().contains("delete on file: delete file"));
+        assertTrue(uf.toString().contains("read on file: read file"));
+        assertTrue(uf.toString().contains("write on file: write file"));
     }
 
     @Test

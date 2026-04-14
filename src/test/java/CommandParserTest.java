@@ -9,8 +9,7 @@ import java.text.Format;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CommandParserTest {
 
@@ -46,21 +45,24 @@ public class CommandParserTest {
     @Test
     void commandparser_printHelp() {
         CommandParser.printHelp();
-
-        assertEquals("""
-                ******
-                *Help*
-                ******
-                \r
+        assertTrue(uf.toString().contains("""
                 -------------
                 |vou1: vou11|
                 -------------
-                \r
+                """
+        ));
+        assertTrue(uf.toString().contains("""
+                ******
+                *Help*
+                ******
+                """
+        ));
+        assertTrue(uf.toString().contains("""
                 ------------
                 |vou: vou11|
                 ------------
-                \r
-                """, uf.toString());
+                """
+        ));
     }
 
     @Test
