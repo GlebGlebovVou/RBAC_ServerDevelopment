@@ -2,8 +2,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.mockito.Mockito;
+import java.nio.file.Path;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -18,6 +20,9 @@ public class CommandRegistryTest {
     private final Scanner scanner = new Scanner(System.in);
     private final RBACSystem system = new RBACSystem();
     private final PrintStream origOut = System.out;
+
+    @TempDir
+    Path tempdir;
 
     @BeforeEach
     void setUp() {
@@ -372,5 +377,37 @@ public class CommandRegistryTest {
         assertTrue(uf.toString().contains("admin (rootAdmin) <ogo@gmail.com>"));
         assertTrue(uf.toString().contains("Role: Admin [ID:"));
         assertTrue(uf.toString().contains("Role: Viewer ["));
+    }
+
+    @Test
+    void commandregistry_report_users_async() {
+        CommandRegistry.report_users_async().execute(new Scanner(System.in),system,null);
+        //CommandRegistry.report_users_async().execute(new Scanner(System.in),system,null);
+        //CommandRegistry.report_users_async().execute(new Scanner(System.in),system,null);
+       // CommandRegistry.report_users_async().execute(new Scanner(System.in),system,null);
+        int count = 0, index = 0;
+        while((index = uf.toString().indexOf("Permissions (3):",index)) != -1) {
+            count++;
+            index += "Permissions (3):".length();
+        }
+        assertEquals(1,count);
+        index = 0;
+        count = 0;
+        while((index = uf.toString().indexOf("Description: main user",index)) != -1) {
+            count++;
+            index += "Description: main user".length();
+        }
+        assertEquals(1,count);
+        count = 0;
+        index = 0;
+        while((index = uf.toString().indexOf("Roles: Role: Admin",index)) != -1) {
+            count++;
+            index += "Roles: Role: Admin".length();
+        }
+        assertEquals(1,count);
+    }
+    @Test
+    void commandregistry_save_async() {
+        CommandRegistry.save_async().execute(new Scanner(System.in),system, new String[]{"Vou"});
     }
 }

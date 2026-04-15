@@ -12,7 +12,12 @@ public class UserManager implements Repository<User>{
     public void add(User item) {
         if(item != null)
         {
-            data.putIfAbsent(item.username(),item);
+            if(data.putIfAbsent(item.username(),item) != null) {
+                IO.println(String.format("%s user is probably already contains; try user-update",item.username()));
+            }
+            else {
+                IO.println(String.format("User %s was added!",item.username()));
+            }
         }
     }
 
@@ -58,9 +63,12 @@ public class UserManager implements Repository<User>{
         return Optional.empty();
     }
 
-    public List<User> findByFilter(UserFilter filter) {
-        IO.println(data.values().stream().filter(filter::test).count());
+    public synchronized List<User> findByFilter(UserFilter filter) {
         return data.values().stream().filter(filter::test).collect(Collectors.toList());
+    }
+
+    public synchronized List<User> findByFilterParallel(UserFilter filter) {
+        return data.values().parallelStream().filter(filter::test).collect(Collectors.toList());
     }
 
     public synchronized boolean exists(String username) {
@@ -70,9 +78,13 @@ public class UserManager implements Repository<User>{
     public synchronized void update(String username, String newFullName, String newEmail) {
         if(data.get(username) != null) {
             User u = User.validate(username,newFullName,newEmail);
-            if(u != null) {
+            User u1 = findById(username).get();
+            if(u1 != null && u != null && u.format().compareTo(u1.format()) != 0) {
                 data.remove(username);
                 add(User.validate(username, newFullName, newEmail));
+            }
+            else {
+                IO.println(String.format("Cannot update user %s",username));
             }
         }
     }

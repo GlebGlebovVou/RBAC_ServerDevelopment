@@ -1,6 +1,7 @@
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 import java.util.List;
+import java.util.Scanner;
 
 public class Main {
     static void testValidation() {
@@ -23,8 +24,7 @@ public class Main {
             IO.println();
         }
     }
-    static void main() {
-        testValidation();
+    static void testSomething() {
         User us = User.validate("goal","cool","fdfd@gfg.");
         Permission p = new Permission("ogo","users","klluta");
         Permission vou = new Permission("nice","users","sdfjjksdfhk");
@@ -36,5 +36,69 @@ public class Main {
         IO.println(a.summary());
         TemporaryAssignment b = new TemporaryAssignment(us,r,AssignmentMetadata.now("user","sadasd"));
         IO.println(b.summary());
+    }
+    static void testNagruz() {
+        RBACSystem system = new RBACSystem();
+        Scanner s = new Scanner(System.in);
+        system.initialize();
+        class MyRunnable implements Runnable {
+            public int id;
+            public RBACSystem system;
+            public Scanner s;
+            public int phase = 0;
+            public String fullname;
+            public MyRunnable(int id, RBACSystem system, Scanner s) {
+                this.id = id;
+                this.system = system;
+                this.s = s;
+                this.fullname = "Fullname";
+            }
+
+            @Override
+            public void run() {
+                while(true) {
+                    IO.println(String.format("%d thread: ", this.id));
+                    switch(phase) {
+                        case 0:
+                            CommandParser.executeCommand("user-create", this.s, this.system,
+                                    new String[]{"username", fullname, "ogo@gmail.com"});
+                            IO.println(this.system.getUserManager().count());
+                            break;
+                        case 1:
+                            this.fullname += "a";
+                            CommandParser.executeCommand("user-update", this.s, this.system,
+                                    new String[]{"username", fullname, "ogo@gmail.com"});
+                            IO.println(this.system.getUserManager().count());
+                            break;
+                        case 2:
+                            CommandParser.executeCommand("user-list",this.s,this.system,null);
+                            break;
+                        case 3:
+                            
+                    }
+                    phase = (phase + 1) % 4;
+                    try {
+                        Thread.sleep(3000);
+                    } catch (Exception e) {
+                        IO.println("error");
+                    }
+                }
+            }
+        }
+        int size = 5;
+        Thread[] uf = new Thread[size];
+        for(int i = 0; i < size; i++) {
+            uf[i] = new Thread(new MyRunnable(i+1,system,s));
+            uf[i].start();
+        }
+        for(int i = 0; i < size; i++) {
+            try{uf[i].join();}
+            catch(Exception e) {IO.println("error");}
+        }
+    }
+    static void main() {
+        //testValidation();
+        //testSomething();
+        testNagruz();
     }
 }

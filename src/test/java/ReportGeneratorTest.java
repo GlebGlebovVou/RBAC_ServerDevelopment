@@ -139,6 +139,7 @@ public class ReportGeneratorTest {
 
     @Test
     public void reportGenerator_generateUserReportParallel() {
+        IO.println("ogo");
         String res = gen.generateUserReportParallel(uman,aman);
         assertEquals(res,"user1 (fullname) <email>\n"+ "Roles: Role: role1 [ID: 1]\n"+
                 "Description: fuldsf\n" +

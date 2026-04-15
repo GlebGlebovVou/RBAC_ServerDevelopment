@@ -110,4 +110,8 @@ public class AssignmentManager implements Repository<RoleAssignment>{
         return data.values().stream().filter(filter::test).collect(Collectors.toList());
     }
 
+    public synchronized List<RoleAssignment> findByFilterParallel(AssignmentFilter filter) {
+        return data.values().parallelStream().filter(filter::test).collect(Collectors.toList());
+    }
+
 }
