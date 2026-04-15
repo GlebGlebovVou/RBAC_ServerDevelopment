@@ -1,8 +1,12 @@
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class RBACSystem {
     private UserManager uman = new UserManager();
     private RoleManager rman = new RoleManager();
     private AssignmentManager aman = new AssignmentManager();
     private String currentUser;
+    public ExecutorService exec = Executors.newFixedThreadPool(5);
 
     public UserManager getUserManager() {
         return uman;
@@ -25,6 +29,8 @@ public class RBACSystem {
     }
 
     public void initialize() {
+        AuditLog.initHandler();
+        CommandRegistry.register();
         Permission[] permissions = new Permission[3];
         permissions[0] = new Permission("READ","file","read file");
         permissions[1] = new Permission("WRITE","file","write file");
