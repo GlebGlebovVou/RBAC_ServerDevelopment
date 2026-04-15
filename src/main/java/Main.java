@@ -12,7 +12,7 @@ public class Main {
                 List.of("User","Name Full Of User", "somethinggmail.com"),
                 List.of("U","Name Full Of User", "something@gmail.com"),
                 List.of("UserTooooooLooooooooooooooooong","Name Full Of User", "something@gmail.com")
-                );
+        );
         int ind = 1;
         for(List<String> curCheck : testsList) {
             IO.println(String.format("%d. user: (usern: %s, full n: %s, em: %s)", ind, curCheck.get(0), curCheck.get(1), curCheck.get(2)));
@@ -74,7 +74,8 @@ public class Main {
                             CommandParser.executeCommand("user-list",this.s,this.system,null);
                             break;
                         case 3:
-                            
+                            CommandParser.executeCommand("user-search",this.s,this.system,new String[]{"username","usern"});
+                            break;
                     }
                     phase = (phase + 1) % 4;
                     try {

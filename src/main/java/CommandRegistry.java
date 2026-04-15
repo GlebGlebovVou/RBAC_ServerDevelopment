@@ -1,6 +1,8 @@
 import java.io.Console;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class CommandRegistry {
@@ -43,9 +45,17 @@ public class CommandRegistry {
 
     static public Command user_create() {
         return (scanner,system,args)-> {
-            String username = ConsoleUtils.promptString(scanner,"Input username: ",true);
-            String fullname = ConsoleUtils.promptString(scanner,"Input full name: ",false);
-            String email = ConsoleUtils.promptString(scanner,"Input email: ",true);
+            String username,fullname,email;
+            if(args != null) {
+                username = args[0];
+                fullname = args[1];
+                email = args[2];
+            }
+            else {
+                username = ConsoleUtils.promptString(scanner, "Input username: ", true);
+                fullname = ConsoleUtils.promptString(scanner, "Input full name: ", false);
+                email = ConsoleUtils.promptString(scanner, "Input email: ", true);
+            }
             int old_size = system.getUserManager().count();
             User u = User.validate(username,fullname,email);
             if(u == null) {
@@ -95,7 +105,15 @@ public class CommandRegistry {
 
     static public Command user_update() {
         return (scanner,system,args)-> {
-            String username = ConsoleUtils.promptString(scanner,"Input username: ",true);
+            String username = "",fullname = "",email = "";
+            if(args != null) {
+                username = args[0];
+                fullname = args[1];
+                email = args[2];
+            }
+            else {
+                username = ConsoleUtils.promptString(scanner, "Input username: ", true);
+            }
             Optional<User> u = system.getUserManager().findById(username);
             if(u.isEmpty()) {
                 IO.println("No such user");
@@ -103,8 +121,10 @@ public class CommandRegistry {
             }
             User user = u.get();
             IO.println(user.format());
-            String fullname = ConsoleUtils.promptString(scanner,"Input new full name: ",false);
-            String email = ConsoleUtils.promptString(scanner,"Input new email: ",true);
+            if(args == null) {
+                fullname = ConsoleUtils.promptString(scanner, "Input new full name: ", false);
+                email = ConsoleUtils.promptString(scanner, "Input new email: ", true);
+            }
             system.getUserManager().update(username,fullname,email);
         };
     }
@@ -135,10 +155,15 @@ public class CommandRegistry {
             filters.add("email");
             filters.add("emailDomain");
             filters.add("fullname");
-            String filterName = ConsoleUtils.promptChoice(scanner,"Select search type: ",filters);
-            String filterKey = ConsoleUtils.promptString(scanner,"Input key: ",true);
-            IO.print(filterName);
-            IO.println(filterKey);
+            String filterName, filterKey;
+            if(args == null) {
+                filterName = ConsoleUtils.promptChoice(scanner, "Select search type: ", filters);
+                filterKey = ConsoleUtils.promptString(scanner, "Input key: ", true);
+            }
+            else {
+                filterName = args[0];
+                filterKey = args[1];
+            }
             List<User> listOfUsers = switch (filterName) {
                 case "username" -> system.getUserManager().findByFilter(UserFilters.byUsernameContains(filterKey));
                 case "email" -> system.getUserManager().findByFilter(UserFilters.byEmail(filterKey));
@@ -489,7 +514,7 @@ public class CommandRegistry {
                     yield system.getAssignmentManager().findByRole(r);
                 }
                 case "type" ->
-                    system.getAssignmentManager().findByFilter(AssignmentFilters.byType(key.toUpperCase(Locale.ROOT)));
+                        system.getAssignmentManager().findByFilter(AssignmentFilters.byType(key.toUpperCase(Locale.ROOT)));
 
                 case "status" -> {
                     if(key.toLowerCase(Locale.ROOT).equals("active")) {
@@ -500,10 +525,10 @@ public class CommandRegistry {
                     }
                 }
                 case "assigned after" ->
-                    system.getAssignmentManager().findByFilter(AssignmentFilters.assignedAfter(key));
+                        system.getAssignmentManager().findByFilter(AssignmentFilters.assignedAfter(key));
 
                 case "expiring before" ->
-                    system.getAssignmentManager().findByFilter(AssignmentFilters.expiringBefore(key));
+                        system.getAssignmentManager().findByFilter(AssignmentFilters.expiringBefore(key));
                 default -> assignments;
             };
             assert assignments != null;
@@ -673,6 +698,7 @@ public class CommandRegistry {
 
     static public void logCommands() {
         CommandParser.registerCommand("audit-log", "Print audio-log", audit_log());
+        CommandParser.registerCommand("save-async", "Save audio-log in file (async)", save_async());
     }
 
     static public Command report_users() {
@@ -695,7 +721,48 @@ public class CommandRegistry {
 
     static public void registerReportView() {
         CommandParser.registerCommand("report-users","Create reports of users",report_users());
-        CommandParser.registerCommand("report-users","Create reports of roles",report_roles());
-        CommandParser.registerCommand("report-users","Create reports of users",report_matrix());
+        CommandParser.registerCommand("report-roles","Create reports of roles",report_roles());
+        CommandParser.registerCommand("report-matrix","Create reports of permissions",report_matrix());
+        CommandParser.registerCommand("report-users-async","Create reports of users",report_users_async());
+    }
+
+    static public Command report_users_async() {
+        return (scanner,system,args) -> {
+            system.exec.execute(() -> {
+                IO.println(ReportGenerator.generateUserReportParallel(system.getUserManager(), system.getAssignmentManager()));
+            });
+            system.exec.shutdown();
+            try {system.exec.awaitTermination(2,TimeUnit.SECONDS);}
+            catch(Exception e) {IO.println(e.getMessage());}
+        };
+    }
+
+    static public Command save_async() {
+        return (scanner,system,args) -> {
+            String name = "temp";
+            if(args[0] != null) {
+                name = args[0];
+            }
+            class MyRunnable implements Runnable {
+                private String name;
+                public MyRunnable(String name) {
+                    this.name = name;
+                }
+                @Override
+                public void run() {
+                    try {
+                        AuditLog.saveToFile(String.format("%s.txt",name));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+            }
+            system.exec.execute(new MyRunnable(name));
+            system.exec.shutdown();
+            try{
+                system.exec.awaitTermination(3,TimeUnit.SECONDS);}
+            catch(Exception e) {IO.println(e.getMessage());}
+        };
     }
 }
