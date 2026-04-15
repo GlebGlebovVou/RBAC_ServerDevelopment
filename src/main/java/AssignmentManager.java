@@ -33,11 +33,11 @@ public class AssignmentManager implements Repository<RoleAssignment>{
     }
 
     @Override
-    public List<RoleAssignment> findAll() {
+    public synchronized List<RoleAssignment> findAll() {
         return data.values().stream().toList();
     }
 
-    public List<RoleAssignment> findAll(AssignmentFilter filter, Comparator<RoleAssignment> sorter) {
+    public synchronized List<RoleAssignment> findAll(AssignmentFilter filter, Comparator<RoleAssignment> sorter) {
         return data.values().stream().filter(filter::test).sorted(sorter).collect(Collectors.toList());
     }
 
@@ -45,7 +45,7 @@ public class AssignmentManager implements Repository<RoleAssignment>{
     public int count() {return data.size();}
 
     @Override
-    public void clear() {data.clear();}
+    public synchronized void clear() {data.clear();}
 
     public List<RoleAssignment> findByUser(User user) {
         return findByFilter(AssignmentFilters.byUser(user));
@@ -106,8 +106,12 @@ public class AssignmentManager implements Repository<RoleAssignment>{
         });
     }
 
-    public List<RoleAssignment> findByFilter(AssignmentFilter filter) {
+    public synchronized List<RoleAssignment> findByFilter(AssignmentFilter filter) {
         return data.values().stream().filter(filter::test).collect(Collectors.toList());
+    }
+
+    public synchronized List<RoleAssignment> findByFilterParallel(AssignmentFilter filter) {
+        return data.values().parallelStream().filter(filter::test).collect(Collectors.toList());
     }
 
 }

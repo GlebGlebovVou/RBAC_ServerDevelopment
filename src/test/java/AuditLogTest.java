@@ -7,37 +7,37 @@ import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class AuditLogTest {
 
-    public AuditLog log = new AuditLog();
-
     @BeforeEach
     public void setUp() {
-        log.entries.clear();
-        log.log("smth","vou","smth","dsf");
-        log.log("smt11h","vou","sm11th","ds1f");
-        log.log("smth","vou11","sm11th","ds1f11");
+        AuditLog.entries.clear();
+        AuditLog.initHandler();
+        AuditLog.log("smth","vou","smth","dsf");
+        AuditLog.log("smt11h","vou","sm11th","ds1f");
+        AuditLog.log("smth","vou11","sm11th","ds1f11");
     }
 
     @Test
     public void auditLog_getAll() {
-        assertEquals(3, log.getAll().size());
-        assertEquals("smth", log.getAll().getFirst().action());
+        assertEquals(3, AuditLog.getAll().size());
+        assertEquals("smth", AuditLog.getAll().getFirst().action());
     }
 
     @Test
     public void auditLog_getByPerformer() {
-        assertEquals(2, log.getByPerformer("vou").size());
-        assertEquals("dsf", log.getByPerformer("vou").getFirst().details());
+        assertEquals(2, AuditLog.getByPerformer("vou").size());
+        assertEquals("dsf", AuditLog.getByPerformer("vou").getFirst().details());
     }
 
     @Test
     public void auditLog_getByAction() {
-        assertEquals(2, log.getByAction("smth").size());
-        assertEquals("smth", log.getByAction("smth").getFirst().target());
+        assertEquals(2, AuditLog.getByAction("smth").size());
+        assertEquals("smth", AuditLog.getByAction("smth").getFirst().target());
     }
 
 }
