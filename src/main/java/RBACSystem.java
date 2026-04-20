@@ -1,5 +1,4 @@
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 public class RBACSystem {
     private UserManager uman = new UserManager();
@@ -7,6 +6,14 @@ public class RBACSystem {
     private AssignmentManager aman = new AssignmentManager();
     private String currentUser;
     public ExecutorService exec = Executors.newFixedThreadPool(5);
+    public ScheduledExecutorService scheduler;
+
+    private static final long SCHEDULER_INITIAL_DELAY_SECONDS = 2L;
+    private static final long SCHEDULER_PERIOD_SECONDS = 30L;
+
+    public ScheduledExecutorService getScheduler() {
+        return scheduler;
+    }
 
     public UserManager getUserManager() {
         return uman;
@@ -54,6 +61,13 @@ public class RBACSystem {
         uman.add(testAdmin);
         aman.add(new PermanentAssignment(testAdmin,admin,new AssignmentMetadata("admin",
                 DateUtils.getCurrentDate(),"asdad")));
+
+        ThreadFactory tf = r -> {
+            Thread t = new Thread(r, "rbac-scheduler");
+            t.setDaemon(true);
+            return t;
+        };
+        this.scheduler = Executors.newSingleThreadScheduledExecutor(tf);
     }
 
     public String generateStatistics() {
@@ -63,4 +77,34 @@ public class RBACSystem {
         f.append(FormatUtils.formatBox(String.format("amount of assignments: %d",aman.findAll().size())));
         return f.toString();
     }
+
+    public void shutdown() {
+        scheduler.shutdown();
+        try {
+            if (!scheduler.awaitTermination(2, TimeUnit.SECONDS)) {
+                scheduler.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            scheduler.shutdownNow();
+        }
+    }
+
+    private void runScheduledMaintenance() {
+        try {
+            int expiredMarked = this.getAssignmentManager().sweepExpiredTemporaryAssignments();
+            int users = getUserManager().count();
+            int roles = getRoleManager().count();
+            int assignments = getAssignmentManager().count();
+            int activeAssignments = getAssignmentManager().getActiveAssignments().size();
+            String details = String.format(
+                    "users=%d roles=%d assignments=%d activeAssignments=%d expiredTempMarkedThisRun=%d",
+                    users, roles, assignments, activeAssignments, expiredMarked);
+            AuditLog.log("SCHEDULER_STATS", "scheduler", "rbac", details);
+        } catch (Throwable t) {
+            AuditLog.log("SCHEDULER_ERROR", "scheduler", "rbac",
+                    t.getMessage() != null ? t.getMessage() : t.getClass().getSimpleName());
+        }
+    }
+
 }

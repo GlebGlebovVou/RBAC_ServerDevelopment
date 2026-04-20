@@ -4,6 +4,7 @@ public class TemporaryAssignment extends AbstractRoleAssignment {
     public String expiresAt = DateUtils.getCurrentDate();
 
     public boolean autoRenew;
+    private volatile boolean inactiveByScheduler;
 
     TemporaryAssignment(User user, Role role, AssignmentMetadata metadata) {
         super(user, role, metadata);
@@ -11,6 +12,9 @@ public class TemporaryAssignment extends AbstractRoleAssignment {
 
     @Override
     public boolean isActive() {
+        if (inactiveByScheduler) {
+            return false;
+        }
         return !isExpired();
     }
 
@@ -32,5 +36,18 @@ public class TemporaryAssignment extends AbstractRoleAssignment {
         String res = super.summary();
         res += String.format("\nExpires at %s",expiresAt);
         return res;
+    }
+
+    public boolean tryMarkInactiveIfExpired() {
+        synchronized (this) {
+            if (!isExpired()) {
+                return false;
+            }
+            if (inactiveByScheduler) {
+                return false;
+            }
+            inactiveByScheduler = true;
+            return true;
+        }
     }
 }
