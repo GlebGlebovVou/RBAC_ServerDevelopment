@@ -114,4 +114,14 @@ public class AssignmentManager implements Repository<RoleAssignment>{
         return data.values().parallelStream().filter(filter::test).collect(Collectors.toList());
     }
 
+    public int sweepExpiredTemporaryAssignments() {
+        int marked = 0;
+        for (RoleAssignment a : data.values()) {
+            if (a instanceof TemporaryAssignment ta && ta.tryMarkInactiveIfExpired()) {
+                marked++;
+            }
+        }
+        return marked;
+    }
+
 }
